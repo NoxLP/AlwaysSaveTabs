@@ -1,0 +1,18 @@
+{
+    "name": "Tabs storage",
+    "version": "1.0",
+    "description": "Store tabs",
+    "permissions": [
+        "storage",
+        "tabs",
+        "unlimitedStorage"
+    ],
+    "background": {
+        "scripts": ["./js/background.js"],
+        "persistent": false
+    },
+    "browser_action": {
+        "default_icon": "./images/tabsIcon.png"
+    },
+    "manifest_version": 2
+}
