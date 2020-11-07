@@ -5,7 +5,7 @@ const CHECKED_CHECKBOXES = {
     last: 0,
     selectedIds: function() { return CHECKED_CHECKBOXES.CBs.filter(x => document.getElementById(x).checked) }
 };
-var shift = false, checkedByScript = false;
+var shift = false, checkedByScript = false, filterCaseSensitive = false;
 
 //#region helpers
 const buildTabDivId = id => { return TAB_PARENT_DIV_ID_PREFIX + id; }
@@ -132,18 +132,18 @@ const onFilterKeyUp = e => {
     Array.from(document.querySelectorAll(".window > div"))
         .filter(x => window.getComputedStyle(x).visibility !== "hidden")
         .forEach(x => {
-            var link = x.getElementsByTagName("a")[0];
+            var link = x.getElementsByTagName("a")[0], reg = new RegExp(input, "i");
             console.log(link.getAttribute("href"))
-            if (link.getAttribute("href").indexOf(input) !== -1 ||
-                Array.from(link.getElementsByTagName("div")).some(x => x.innerText.indexOf(input) !== -1)) {
+            if (reg.test(link.getAttribute("href")) ||
+                Array.from(link.getElementsByTagName("div")).some(x => reg.test(x.innerText))) {
                     x.style.display = "flex";//.classList.remove("hidden");
                     document.getElementById(getHrIdFromDivId(x.id)).style.display = "block";//.classList.remove("hidden");
             } else {
                 x.style.display = "none";//.classList.add("hidden");
                 document.getElementById(getHrIdFromDivId(x.id)).style.display = "none";//.classList.add("hidden");
             }
-        })
-}
+        });
+};
 //#endregion
 
 //#region events
