@@ -1,13 +1,26 @@
-const TABS_STORAGE_KEY = "tabsWhenClosing", HTML_NAME = "tabsManagement.html";
+const TABS_STORAGE_KEY = "tabsWhenClosing", HTML_NAME = "tabsManagement.html", 
+    MSG_CONFIRM_MULTIPLE_WINDOWS = `Hay pestañas guardadas para varias ventanas. Se cargarán las
+pestañas de la ventana con más pestañas. Si prefiere elegir otras pestañas debe hacerlo desde 
+gestión de pestañas. ¿Quiere abrir gestión de pestañas?`;
 
 var myTabs = {}, windowsByTabs = {}, mtCreated;
 
 //**************************************************************************
 // UI
-const openInNewTab = url => {
+const openInNewTabOrSelectExistingTab = url => {
     console.log()
     console.log("%%%%%%%% NEW TAB")
-    chrome.tabs.create({"url": url});
+    if(!mtCreated)
+        chrome.tabs.create({"url": url});
+    else {
+        for(let window in myTabs) {
+            let index;
+            if((index = window.findIndex(tab => tabIsMT(tab))) != -1) {
+                chrome.tabs.update(window[index].id, {selected: true});
+                break;
+            }
+        }
+    }
 };
 const tabIsMT = tab => {
     console.log("ISMT ", tab)
@@ -15,8 +28,7 @@ const tabIsMT = tab => {
 }
 chrome.browserAction.onClicked.addListener(() => {
     console.log("ICON CLICK")
-    if(!mtCreated)
-        openInNewTab("./" + HTML_NAME);
+    openInNewTabOrSelectExistingTab("./" + HTML_NAME);
 });
 
 
@@ -54,13 +66,20 @@ const removeTab = tabId => {
 
     chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
 };
-const updateTabPropertyNoCheck = (tab, prop, value) => {
+const updateTab = tab => {
+    let index = myTabs[tab.windowId].findIndex(x => x.id === tab.id);
+    myTabs[tab.windowId][index] = tab;
+    console.log("UPDATED TAB TO", myTabs[tab.windowId][index]);
+
+    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
+}
+/*const updateTabPropertyNoCheck = (tab, prop, value) => {
     let index = myTabs[tab.windowId].findIndex(x => x.id === tab.id);
     myTabs[tab.windowId][index][prop] = value;
     console.log("UPDATED TAB ", myTabs[tab.windowId][index] , "PROP: ", prop, "TO: ", myTabs[tab.windowId][index][prop]);
 
     chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
-}
+}*/
 const getWindowTabsString = windowId => {
     return myTabs[windowId]
         .map(x => x.url)
@@ -68,13 +87,23 @@ const getWindowTabsString = windowId => {
 };
 
 chrome.tabs.getAllInWindow(null, tabs => {
-    chrome.storage.local.get(TABS_STORAGE_KEY, x => console.log(x));
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: null});
+    chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
+        console.log("tabsStored", tabsStored)
+        let windows = Object.keys(tabsStored);
+        if(windows.length > 1 && window.confirm(MSG_CONFIRM_MULTIPLE_WINDOWS)) {
+            openInNewTabOrSelectExistingTab("./" + HTML_NAME);
+            return;
+        } else {
+            console.log("AQUI------------")
+            myTabs[windows[0]] = tabsStored[TABS_STORAGE_KEY][windows[0]];
+        }
+    });
+    /*chrome.storage.local.set({[TABS_STORAGE_KEY]: null});
     tabs.forEach(x => {
         storeTab(x, false);
     });
-    console.log(myTabs)
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
+    console.log("myTabs", myTabs)
+    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});*/
 });
 
 chrome.tabs.onCreated.addListener(tab => {
@@ -92,7 +121,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     console.log(tab)
     console.log(changeInfo.url)
-    updateTabPropertyNoCheck(tab, "url", changeInfo.url);
+    updateTab(tab);
 });
 
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
@@ -106,7 +135,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 chrome.windows.onRemoved.addListener(windowId => {
     console.log("--------- On window removed");
     console.log(myTabs);
-    console.log("Tabs stored when closed: \n" + getWindowTabsString(windowId));
+    console.log("Tabs stored when closed:", getWindowTabsString(windowId));
 
     chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
     chrome.storage.local.get(TABS_STORAGE_KEY, x => console.log("STORED"));

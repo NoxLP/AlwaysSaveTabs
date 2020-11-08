@@ -18,6 +18,7 @@ const storeCheckbox = cb => {
 const createTabElementIn = (element, tab) => {
     let tabElem = document.createElement("div");
     tabElem.id = buildTabDivId(tab.id);
+    console.log("ICON URL-------", tab.favIconUrl)
     tabElem.innerHTML = `
         <input class="${REMOVE_TAB_CB_CLASS}" type="checkbox" id="${tab.id}">
         <img src="${tab.favIconUrl}" alt="web icon">
@@ -180,6 +181,7 @@ chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
 
     for(let windowKey in tabsStored[TABS_STORAGE_KEY]) {
         let window = tabsStored[TABS_STORAGE_KEY][windowKey];
+        console.log(window)
         let windowElem = document.createElement("div");
         windowElem.classList.add("window");
 

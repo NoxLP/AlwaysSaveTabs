@@ -5,7 +5,7 @@ body {
 header {
     position: relative;
     height: 8vh;
-    width: 100vw;
+    width: 99vw;
     margin: -8px 0px 0px -8px;
     border: 0px;
     background-color: rgb(51, 103, 214);
@@ -13,7 +13,6 @@ header {
     padding: 2.5vh 0 2.5vh 0;
 }
 #webBody {
-    width: 100vw;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -21,7 +20,8 @@ header {
 }
 #windowsList {
     padding: 30px 5vw;
-    width: 1200px;
+    margin-right: 0;
+    width: 60vw;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -105,7 +105,7 @@ input[type="checkbox"] {
 }
 /*All the tabs of one window goes inside one div with class .window*/
 .window {
-    width: 1000px;
+    width: 60vw;
     padding: 15px 0;
     background-color: white;
     border: 1px solid lightgray;
@@ -117,7 +117,7 @@ input[type="checkbox"] {
     box-sizing: border-box; 
 }
 .window > div {
-    width: 900px;
+    width: 57vw;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -129,7 +129,7 @@ input[type="checkbox"] {
     margin: 10px 0px 10px 30px;
 }
 .window > div:hover {
-    background-color: lightskyblue;
+    background-color: rgba(222, 240, 251, 0.644);
 }
 .window > hr {
     display: block;
@@ -150,7 +150,7 @@ input[type="checkbox"] {
 .window > div > a > div {
     flex-grow: 3;
     padding-left: 20px;
-    max-width: 600px;
+    max-width: 35vw;
     text-overflow: ellipsis;
     overflow: hidden;
 }
@@ -159,7 +159,7 @@ input[type="checkbox"] {
     color: gray;
     font-size: 9pt;
     padding-left: 50px;
-    max-width: 400px;
+    max-width: 20vw;
 }
 .window > div > img {
     margin: 0px 15px 0px 0px;
