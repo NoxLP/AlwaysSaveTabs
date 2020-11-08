@@ -18,14 +18,6 @@ header {
     justify-content: flex-start;
     align-content: stretch;
 }
-#windowsList {
-    padding: 30px 5vw;
-    margin-right: 0;
-    width: 60vw;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-}
 aside {
     position: sticky;
     top: 0px;
@@ -98,10 +90,18 @@ label > input::placeholder {
 input[type="checkbox"] {
     margin-right: 20px;
 }
-
 .filterHoverFocus {
     background-color: rgba(169, 203, 219, 0.205);
     border-color: rgb(0, 110, 255);
+}
+
+#windowsList {
+    padding: 30px 5vw;
+    margin-right: 0;
+    width: 60vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 /*All the tabs of one window goes inside one div with class .window*/
 .window {

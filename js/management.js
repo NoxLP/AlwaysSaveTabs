@@ -19,12 +19,16 @@ const createTabElementIn = (element, tab) => {
     let tabElem = document.createElement("div");
     tabElem.id = buildTabDivId(tab.id);
     console.log("ICON URL-------", tab.favIconUrl)
+    let domain = tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)[0];
+    let icon = tab.favIconUrl ? 
+        tab.favIconUrl : 
+        "http://s2.googleusercontent.com/s2/favicons?domain_url=" + domain;
     tabElem.innerHTML = `
         <input class="${REMOVE_TAB_CB_CLASS}" type="checkbox" id="${tab.id}">
-        <img src="${tab.favIconUrl}" alt="web icon">
+        <img src="${icon}" alt="web icon">
         <a href="${tab.url}">
             <div>${tab.title}</div>
-            <div>${tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)[0]}</div>
+            <div>${domain}</div>
         </a>
         <br>`;
     element.appendChild(tabElem);

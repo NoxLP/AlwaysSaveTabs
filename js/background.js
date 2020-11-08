@@ -94,8 +94,14 @@ chrome.tabs.getAllInWindow(null, tabs => {
             openInNewTabOrSelectExistingTab("./" + HTML_NAME);
             return;
         } else {
-            console.log("AQUI------------")
-            myTabs[windows[0]] = tabsStored[TABS_STORAGE_KEY][windows[0]];
+            console.log("getAllInWindow------------")
+            if(tabs.length > tabsStored[TABS_STORAGE_KEY][windows[0]].length) {
+                tabs.forEach(x => {
+                    storeTab(x, false);
+                });
+            } else {
+                myTabs[windows[0]] = tabsStored[TABS_STORAGE_KEY][windows[0]];
+            }
         }
     });
     /*chrome.storage.local.set({[TABS_STORAGE_KEY]: null});
@@ -128,16 +134,20 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
     console.log("----------- on removed")
     if(removeInfo.isWindowClosing)
         return;
-
+        
     removeTab(tabId);
 });
 
-chrome.windows.onRemoved.addListener(windowId => {
+/*chrome.windows.onRemoved.addListener(windowId => {
     console.log("--------- On window removed");
-    console.log(myTabs);
-    console.log("Tabs stored when closed:", getWindowTabsString(windowId));
+    console.log("MYTABS", myTabs);
+    
+    //Test icons not being stored when window gets closed
+    let tabs = myTabs[Object.keys(myTabs)[0]];
+    console.log(tabs.filter(x => x.favIconUrl));
+    //*****************************************************
 
     chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
     chrome.storage.local.get(TABS_STORAGE_KEY, x => console.log("STORED"));
-});
+});*/
 //**************************************************************************
