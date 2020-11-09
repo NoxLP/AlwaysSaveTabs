@@ -1,5 +1,10 @@
 console.log("*/******************** MANAGEMENT")
-const TAB_PARENT_DIV_ID_PREFIX = "tabDiv", TAB_PARENT_HR_ID_PREFIX = "tabHr", TABS_STORAGE_KEY = "tabsWhenClosing", MT_WINDOWSLIST = "windowsList", REMOVE_TAB_CB_CLASS = "deleteTabCB", LOAD_TAB_CB_CLASS = "loadTabCB";
+const TAB_PARENT_DIV_ID_PREFIX = "tabDiv", 
+    TAB_PARENT_HR_ID_PREFIX = "tabHr", 
+    TABS_STORAGE_KEY = "tabsWhenClosing", 
+    MT_WINDOWSLIST = "windowsList", 
+    REMOVE_TAB_CB_CLASS = "deleteTabCB", 
+    LOAD_TAB_CB_CLASS = "loadTabCB";
 const CHECKED_CHECKBOXES = {
     CBs: [], 
     last: 0,
@@ -17,6 +22,7 @@ const storeCheckbox = cb => {
 };
 const createTabElementIn = (element, tab) => {
     let tabElem = document.createElement("div");
+    tabElem.title = tab.title + "   ;   " + tab.url;
     tabElem.id = buildTabDivId(tab.id);
     console.log("ICON URL-------", tab.favIconUrl)
     let domain = tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)[0];
@@ -26,18 +32,18 @@ const createTabElementIn = (element, tab) => {
     tabElem.innerHTML = `
         <input class="${REMOVE_TAB_CB_CLASS}" type="checkbox" id="${tab.id}">
         <img src="${icon}" alt="web icon">
-        <a href="${tab.url}">
+        <a target="_blank" href="${tab.url}">
             <div>${tab.title}</div>
             <div>${domain}</div>
         </a>
-        <br>`;
+        <br>`; 
     element.appendChild(tabElem);
-
+        
     let hr = document.createElement("hr");
     hr.id = buildTabHrId(tab.id);
 
     element.appendChild(hr);
-
+        
     storeCheckbox(tabElem.getElementsByClassName(REMOVE_TAB_CB_CLASS)[0]);
 };
 //#endregion
