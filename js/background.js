@@ -90,14 +90,15 @@ chrome.tabs.getAllInWindow(null, tabs => {
     chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
         console.log("tabsStored", tabsStored)
         let windows = Object.keys(tabsStored);
+        console.log("KEYS",tabsStored[TABS_STORAGE_KEY][windows[0]], windows)
         if(windows.length > 1 && window.confirm(MSG_CONFIRM_MULTIPLE_WINDOWS)) {
             openInNewTabOrSelectExistingTab("./" + HTML_NAME);
-            return;
+            return;  
         } else {
             console.log("getAllInWindow------------")
-            if(tabs.length > tabsStored[TABS_STORAGE_KEY][windows[0]].length) {
+            if(!tabsStored[TABS_STORAGE_KEY][windows[0]] || tabs.length > tabsStored[TABS_STORAGE_KEY][windows[0]].length) {
                 tabs.forEach(x => {
-                    storeTab(x, false);
+                    storeTab(x);
                 });
             } else {
                 myTabs[windows[0]] = tabsStored[TABS_STORAGE_KEY][windows[0]];
