@@ -1,154 +1,183 @@
-const TABS_STORAGE_KEY = "tabsWhenClosing", HTML_NAME = "tabsManagement.html", 
-    MSG_CONFIRM_MULTIPLE_WINDOWS = `Hay pestañas guardadas para varias ventanas. Se cargarán las
+import { MyTab } from "./model/MyTab.js";
+import { MyWindow } from "./model/MyWindow.js";
+
+const TABS_STORAGE_KEY = "tabsWhenClosing", HTML_NAME = "tabsManagement.html";
+const MSG_CONFIRM_MULTIPLE_WINDOWS = `Hay pestañas guardadas para varias ventanas. Se cargarán las
 pestañas de la ventana con más pestañas. Si prefiere elegir otras pestañas debe hacerlo desde 
 gestión de pestañas. ¿Quiere abrir gestión de pestañas?`;
+const MSG_CONFIRM_STORE_CLOSING_WINDOW_TABS = `Acaba de cerrar una ventana de chrome ¿Quiere guardar las pestañas de dicha ventana?`;
 
-var myTabs = {}, windowsByTabs = {}, mtCreated;
+//loaded windows from chrome local storage
+var loadedWindows = [];
+//windows currently on screen
+var windows = [];
+//is management tab already created?
+var mtCreated;
 
 //**************************************************************************
 // UI
+//#region ui
+/**
+ * Open new tab
+ * @param {string} url Tab url
+ */
 const openInNewTabOrSelectExistingTab = url => {
-    console.log()
-    console.log("%%%%%%%% NEW TAB")
-    if(!mtCreated)
-        chrome.tabs.create({"url": url});
-    else {
-        for(let window in myTabs) {
-            let index;
-            if((index = window.findIndex(tab => tabIsMT(tab))) != -1) {
-                chrome.tabs.update(window[index].id, {selected: true});
-                break;
-            }
-        }
-    }
+  console.log()
+  console.log("%%%%%%%% NEW TAB")
+  if (!mtCreated)
+    chrome.tabs.create({ "url": url });
+  else {
+    //********************** TODO  
+    //Select tab with url === url among existing tabs
+
+    /*for(let window in myTabs) {
+      let index;
+      if((index = window.findIndex(tab => tabIsMT(tab))) != -1) {
+        chrome.tabs.update(window[index].id, {selected: true});
+        break;
+      }
+    }*/
+  }
 };
-const tabIsMT = tab => {
-    console.log("ISMT ", tab)
-    return tab.url.slice(tab.url.length - HTML_NAME.length) === HTML_NAME;
-}
+
+/**
+ * Event for opening extension management tab
+ */
 chrome.browserAction.onClicked.addListener(() => {
-    console.log("ICON CLICK")
-    openInNewTabOrSelectExistingTab("./" + HTML_NAME);
+  console.log("ICON CLICK")
+  openInNewTabOrSelectExistingTab("./" + HTML_NAME);
 });
-
-
-//**************************************************************************
+//#endregion
 
 //**************************************************************************
 // TABS MANAGING
-const storeTab = (tab, sync = true) => {
-    if(!myTabs.hasOwnProperty(tab.windowId))
-        myTabs[tab.windowId] = [];
-    else if(myTabs[tab.windowId].findIndex(x => x.id === tab.id) !== -1) 
-        return;
+/*
+Store every new window
+  if tabs equals one of the stored windows
+    update window currentChromeId
+    store saved window as open window
+  else
+    create new MyWindow
+Store every new tab in respective window
+Update every tab url in respective window
+Remove tab of its respective window unless the window is closing
+When a window is removed, ask user if store permanently its tabs
+*/
 
-    myTabs[tab.windowId].push(tab);
-    windowsByTabs[tab.id] = tab.windowId;
+/**
+ * Used when a new window is opened to add correspondent MyWindow to windows or to update existing MyWindow
+ * @param {array} tabs Tabs of new window that chrome provides through getAllInWindow event's parameter
+ */
+const addOrUpdateNewWindow = tabs => {
+  let loadedWindowIndex, newWindow;
+  if ((loadedWindowIndex = loadedWindows.findIndex(x => x.allTabsEqualsByUrl(tabs))) === -1) { //if no loaded window equals opened window
+    //add opened window to loaded windows
+    newWindow = new MyWindow(tabs[0].windowId, tabs);
+    loadedWindows.push(newWindow)
+  } else { //found a window already loaded with same tabs
+    newWindow = loadedWindows[loadedWindowIndex];
+    //update window id
+    newWindow.currentChromeId = tabs[0].windowId;
+    //update loaded tabs current and chrome tabId
+    newWindow.updateTabsChromeIds(tabs);
+  }
 
-    if(sync)
-        chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
-};
-const removeTab = tabId => {
-    if(!windowsByTabs.hasOwnProperty(tabId))
-        return;
-
-    let index, window = windowsByTabs[tabId];
-    if(!myTabs.hasOwnProperty(window) || (index = myTabs[window].findIndex(x => x.id === tabId)) === -1)
-        return;
-    
-    if(tabIsMT(myTabs[window][index])) {
-        console.log("************ CREATED FALSE")
-        mtCreated = false;
-    }
-    myTabs[window].splice(index, 1);
-    if(myTabs[window].length === 0)
-        delete myTabs[window];
-
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
-};
-const updateTab = tab => {
-    let index = myTabs[tab.windowId].findIndex(x => x.id === tab.id);
-    myTabs[tab.windowId][index] = tab;
-    console.log("UPDATED TAB TO", myTabs[tab.windowId][index]);
-
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
+  //anyway, add new window to windows
+  windows.push(newWindow);
+  console.log("loadedWindows", loadedWindows)
+  console.log("windows", windows)
 }
-/*const updateTabPropertyNoCheck = (tab, prop, value) => {
-    let index = myTabs[tab.windowId].findIndex(x => x.id === tab.id);
-    myTabs[tab.windowId][index][prop] = value;
-    console.log("UPDATED TAB ", myTabs[tab.windowId][index] , "PROP: ", prop, "TO: ", myTabs[tab.windowId][index][prop]);
 
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
-}*/
-const getWindowTabsString = windowId => {
-    return myTabs[windowId]
-        .map(x => x.url)
-        .join("\n");
-};
-
+/*
+Store every new window
+  if tabs equals one of the stored windows
+    update window currentChromeId
+    store saved window as open window
+  else
+    create new MyWindow
+*/
 chrome.tabs.getAllInWindow(null, tabs => {
-    chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
-        console.log("tabsStored", tabsStored)
-        let windows = Object.keys(tabsStored);
-        console.log("KEYS",tabsStored[TABS_STORAGE_KEY][windows[0]], windows)
-        if(windows.length > 1 && window.confirm(MSG_CONFIRM_MULTIPLE_WINDOWS)) {
-            openInNewTabOrSelectExistingTab("./" + HTML_NAME);
-            return;  
-        } else {
-            console.log("getAllInWindow------------")
-            if(!tabsStored[TABS_STORAGE_KEY][windows[0]] || tabs.length > tabsStored[TABS_STORAGE_KEY][windows[0]].length) {
-                tabs.forEach(x => {
-                    storeTab(x);
-                });
-            } else {
-                myTabs[windows[0]] = tabsStored[TABS_STORAGE_KEY][windows[0]];
-            }
-        }
+  console.log(tabs);
+  //if there are no windows loaded yet(first window opened), load stored windows
+  if (loadedWindows.length === 0) {
+    chrome.storage.local.get(TABS_STORAGE_KEY, windowsStored => {
+      console.log("windowsStored", windowsStored[TABS_STORAGE_KEY])
+      loadedWindows = windowsStored[TABS_STORAGE_KEY] || [];
+      addOrUpdateNewWindow(tabs);
     });
-    /*chrome.storage.local.set({[TABS_STORAGE_KEY]: null});
-    tabs.forEach(x => {
-        storeTab(x, false);
-    });
-    console.log("myTabs", myTabs)
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});*/
+  } else {
+    addOrUpdateNewWindow(tabs);
+  }
 });
 
+//Store every new tab in respective window
 chrome.tabs.onCreated.addListener(tab => {
-    console.log("----------- on created");
-
-    storeTab(tab);
-    if(tabIsMT(tab) && !mtCreated)
-        mtCreated = true;
+  /*
+  found tab's MyWindow on windows
+  add tab to window
+  */
+  console.log("----------- on created")
+  let index = windows.findIndex(x => x.currentChromeId === tab.windowId);
+  if(index === -1)
+    windows.push(new MyWindow(tab.windowId, [tab]));
+  else
+    windows[index].tabs.push(new MyTab(tab));
 });
 
+//Update every tab url in respective window
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log("----------- on updated")
-    if(!changeInfo.hasOwnProperty("url"))
-        return;
+  /*
+  if changes on tab are different than url, stop
+  else find tab's MyTab and update url
+  */
+  console.log("----------- on updated")
+  if (!changeInfo.hasOwnProperty("url"))
+    return;
 
-    console.log(tab)
-    console.log(changeInfo.url)
-    updateTab(tab);
+  console.log(tab)
+  console.log(changeInfo.url)
+  let myTab;
+  for (let i = 0; i < windows.length; i++) {
+    let window = windows[i];
+    if (window.currentChromeId === tab.windowId) {
+      myTab = window.tabs[window.findMyTabIndexByChromeId(tabId)];
+      break;
+    }
+  }
+  myTab.url = tab.url;
 });
 
+
+//Remove tab of its respective window unless the window is closing
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-    console.log("----------- on removed")
-    if(removeInfo.isWindowClosing)
-        return;
-        
-    removeTab(tabId);
+  console.log("----------- on removed", removeInfo)
+  if (removeInfo.isWindowClosing) {
+    console.log("CLOSING ");
+    return;
+  }
+
+  for (let i = 0; i < windows.length; i++) {
+    let index = windows[i].findMyTabIndexByChromeId(tabId);
+    if(index === -1)
+      continue;
+    else {
+      windows[i].tabs.splice(index, 1);
+      break;
+    }
+  }
 });
 
-/*chrome.windows.onRemoved.addListener(windowId => {
-    console.log("--------- On window removed");
-    console.log("MYTABS", myTabs);
-    
-    //Test icons not being stored when window gets closed
-    let tabs = myTabs[Object.keys(myTabs)[0]];
-    console.log(tabs.filter(x => x.favIconUrl));
-    //*****************************************************
+//When a window is removed, ask user if store permanently its tabs
+chrome.windows.onRemoved.addListener(windowId => {
+  if(windows.length === 1) { //window closing is the only one opened => update local storage
+    chrome.storage.local.set({[TABS_STORAGE_KEY]: windows});
+  } else { //otherwise ask if user want to store closing window
+    let index = windows.findIndex(x => x.currentChromeId === windowId);
+    if(window.confirm(MSG_CONFIRM_STORE_CLOSING_WINDOW_TABS)) {
+      loadedWindows.push(windows[index]);
+      chrome.storage.local.set({[TABS_STORAGE_KEY]: loadedWindows});
+    }
+  }
 
-    chrome.storage.local.set({[TABS_STORAGE_KEY]: myTabs});
-    chrome.storage.local.get(TABS_STORAGE_KEY, x => console.log("STORED"));
-});*/
-//**************************************************************************
+  windows.splice(index, 1);
+});

@@ -9,6 +9,7 @@
     ],
     "background": {
         "page": "background.html",
+        "scripts": ["./js/background.js"],
         "persistent": false
     },
     "browser_action": {
