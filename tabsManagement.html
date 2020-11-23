@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./css/management.css">
     <link rel="stylesheet" href="./css/windowTabsFrameStyles.css">
-    <script src="./js/management.js"></script>
+    <link rel="shortcut icon" href="images\tabsIcon.png" type="image/x-icon">
+    <script src="./js/management.js" type="module"></script>
     <title>Document</title>
 </head>
 <body>
@@ -13,12 +14,13 @@
     </header>
     <section id="webBody">
         <aside>
+            <button id="saveAll">Save tabs of current window</button>
             <button id="loadAll">Load all</button>
             <button id="loadSel">Load selected</button>
             <button id="remSel">Remove selected</button>
             <label class="filter">
                 <img src="./images/filterIcon.png" alt="filter">
-                <input id="filterInput" type="text" placeholder="Filter">
+                <input id="filterInput" type="text" placeholder="Filtro">
             </label>
         </aside>
         <section id="windowsList">

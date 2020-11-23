@@ -1,10 +1,7 @@
 import { MyTab } from "./MyTab.js";
 
-var lastId = -1;
-
 export class MyWindow {
   constructor(windowId, tabs) {
-    this.id = ++lastId;
     this.tabs = tabs.map(tab => new MyTab(tab));
     this.currentChromeId = windowId;
   }

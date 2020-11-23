@@ -1,11 +1,9 @@
-var lastId = -1;
-
 export class MyTab {
   constructor(chromeTab) {
-    this.id = ++lastId;
+    console.log(chromeTab)
     this.url = chromeTab.url;
     this.tabId = chromeTab.id;
-    this.muted = chromeTab.mutedInfo.muted;
+    this.muted = chromeTab.mutedInfo.muted || false;
     this.pinned = chromeTab.pinned;
     this.selected = chromeTab.selected;
     this.title = chromeTab.title;
