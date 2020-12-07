@@ -1,7 +1,7 @@
 export class MyTab {
   constructor(chromeTab) {
     console.log(chromeTab)
-    if(chromeTab) {
+    if (chromeTab) {
       this.url = chromeTab.url;
       this.tabId = chromeTab.id;
       this.muted = chromeTab.mutedInfo.muted || false;

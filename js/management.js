@@ -57,15 +57,17 @@ const onSaveCurrentWindowTabs = () => {
     console.log("QUERY", tabs)
     chrome.storage.local.get(TABS_STORAGE_KEY, windowsStored => {
       let windows = windowsStored[TABS_STORAGE_KEY];
-      if(!windows || windows.length === 0) {
-        chrome.storage.local.set({ [TABS_STORAGE_KEY]: [
-          new MyWindow(tabs[0].windowId, tabs)
-        ]});
+      if (!windows || windows.length === 0) {
+        chrome.storage.local.set({
+          [TABS_STORAGE_KEY]: [
+            new MyWindow(tabs[0].windowId, tabs)
+          ]
+        });
       } else {
         let window = new MyWindow(tabs[0].windowId, tabs);
-        if(!windows.some(x => x.allTabsEqualsByUrl(window.tabs))) {
+        if (!windows.some(x => x.allTabsEqualsByUrl(window.tabs))) {
           windows.push(window);
-          chrome.storage.local.set({ [TABS_STORAGE_KEY]: windows});
+          chrome.storage.local.set({ [TABS_STORAGE_KEY]: windows });
         }
       }
     });
@@ -216,13 +218,13 @@ const buildHtml = () => {
     console.log("*/******************** STORAGE GET")
     console.log(tabsStored)
     let wList = document.getElementById(MT_WINDOWSLIST);
-  
+
     for (let windowKey in tabsStored[TABS_STORAGE_KEY]) {
       let window = tabsStored[TABS_STORAGE_KEY][windowKey];
       console.log(window)
       let windowElem = document.createElement("div");
       windowElem.classList.add("window");
-  
+
       window.tabs.forEach(tab => createTabElementIn(windowElem, tab));
       wList.appendChild(windowElem);
       wList.appendChild(document.createElement("br"));

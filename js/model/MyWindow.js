@@ -1,12 +1,22 @@
 import { MyTab } from "./MyTab.js";
 
+
 export class MyWindow {
-  constructor(windowId, tabs, fromJSON) {
-    this.tabs = !fromJSON ? tabs.map(tab => new MyTab(tab)) : tabs.map(tab => MyTab.mapFromJSON(tab));
+  /**
+   * Constructor
+   * @param {chromeId} windowId Original chrome window id
+   * @param {array} tabs Array of new tabs
+   * @param {string} from Creating new window from JSON(local storage) "JSON", new window opened by user "user", or using a myTab object(usually from attach-detach) "myTab"
+   */
+  constructor(windowId, tabs, from = "user") {
+    this.tabs = from === "user" ? 
+      tabs.map(tab => new MyTab(tab)) : 
+      from === "JSON" ? tabs.map(tab => MyTab.mapFromJSON(tab)) :
+      tabs;
     this.currentChromeId = windowId;
   }
   static mapFromJSON(JSON) {
-    return new MyWindow(JSON.currentChromeId, JSON.tabs, true);
+    return new MyWindow(JSON.currentChromeId, JSON.tabs, "JSON");
   }
   /**
    * Returns if tabs array have the same tabs than this.tabs. Used to check if new opened window's tabs are the same as a stored MyWindow's tabs array.
