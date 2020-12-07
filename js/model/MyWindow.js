@@ -44,10 +44,7 @@ export class MyWindow {
    * @param {chromeTab} tab Tab ro be found on this.tabs
    */
   findMyTabIndexByChromeId(tabId) {
-    let index = this.tabs.findIndex(x => x.tabId === tabId);
-    if (index !== -1)
-      return index;
-    return false;
+    return this.tabs.findIndex(x => x.tabId === tabId);
   }
   /**
    * Update tabId of all MyTab in this.tabs. Does NOT check if tabs has same tabs as this.tabs.
