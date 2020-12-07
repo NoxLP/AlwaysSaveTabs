@@ -16,6 +16,9 @@ const CHECKED_CHECKBOXES = {
 var shift = false, checkedByScript = false, filterCaseSensitive = false;
 
 //#region helpers
+const saveOnLocalStorage = () => {
+  localStorage.setItem(TABS_STORAGE_KEY, JSON.stringify(myWindows));
+}
 const buildTabDivId = id => { return TAB_PARENT_DIV_ID_PREFIX + id; }
 const buildTabHrId = id => { return TAB_PARENT_HR_ID_PREFIX + id; }
 const getHrIdFromDivId = id => { return buildTabHrId(id.match(new RegExp(`(?<=${TAB_PARENT_DIV_ID_PREFIX}).*`))[0]) }
@@ -51,53 +54,52 @@ const createTabElementIn = (element, tab) => {
 //#endregion
 
 //#region events callbacks
-const onSaveCurrentWindowTabs = () => {
+/*const onSaveCurrentWindowTabs = () => {
   console.log("onSaveCurrentWindowTabs")
   chrome.tabs.query({}, function (tabs) {
     console.log("QUERY", tabs)
-    chrome.storage.local.get(TABS_STORAGE_KEY, windowsStored => {
-      let windows = windowsStored[TABS_STORAGE_KEY];
-      if (!windows || windows.length === 0) {
-        chrome.storage.local.set({
-          [TABS_STORAGE_KEY]: [
-            new MyWindow(tabs[0].windowId, tabs)
-          ]
-        });
-      } else {
-        let window = new MyWindow(tabs[0].windowId, tabs);
-        if (!windows.some(x => x.allTabsEqualsByUrl(window.tabs))) {
-          windows.push(window);
-          chrome.storage.local.set({ [TABS_STORAGE_KEY]: windows });
-        }
+    let windowsStored = localStorage.getItem(TABS_STORAGE_KEY);
+    let windows = windowsStored[TABS_STORAGE_KEY];
+    if (!windows || windows.length === 0) {
+
+      localStorage.setItem({
+        TABS_STORAGE_KEY,
+        [TABS_STORAGE_KEY]: [
+          new MyWindow(tabs[0].windowId, tabs)
+        ]
+      });
+    } else {
+      let myWindow = new MyWindow(tabs[0].windowId, tabs);
+      if (!windows.some(x => x.allTabsEqualsByUrl(myWindow.tabs))) {
+        windows.push(myWindow);
+        localStorage.setItem(TABS_STORAGE_KEY, { [TABS_STORAGE_KEY]: windows });
       }
-    });
+    }
     /*chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       chrome.tabs.reload(tabs[0].id);
     });*/
-    buildHtml();
+    /*buildHtml();
   });
-};
+};*/
 const onLoadAllTabs = () => {
-  chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
-    for (let windowKey in tabsStored[TABS_STORAGE_KEY]) {
-      tabsStored[TABS_STORAGE_KEY][windowKey].tabs
-        .forEach(tab => {
-          chrome.tabs.create({ url: tab.url }, x => console.log("Tab loaded:", x))
-        });
-    }
-  });
+  let windowsStored = localStorage.getItem(TABS_STORAGE_KEY);
+  for (let windowKey in windowsStored[TABS_STORAGE_KEY]) {
+    windowsStored[TABS_STORAGE_KEY][windowKey].tabs
+      .forEach(tab => {
+        chrome.tabs.create({ url: tab.url }, x => console.log("Tab loaded:", x))
+      });
+  }
 };
 const onLoadSelectedTabs = () => {
   const selectedIds = CHECKED_CHECKBOXES.selectedIds();
-  chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
-    for (let windowKey in tabsStored[TABS_STORAGE_KEY]) {
-      tabsStored[TABS_STORAGE_KEY][windowKey].tabs
-        .filter(tab => selectedIds.includes(tab.tabId))
-        .forEach(tab => {
-          chrome.tabs.create({ url: tab.url }, x => console.log("Tab loaded:", x))
-        });
-    }
-  });
+  let windowsStored = localStorage.getItem(TABS_STORAGE_KEY);
+  for (let windowKey in windowsStored[TABS_STORAGE_KEY]) {
+    windowsStored[TABS_STORAGE_KEY][windowKey].tabs
+      .filter(tab => selectedIds.includes(tab.tabId))
+      .forEach(tab => {
+        chrome.tabs.create({ url: tab.url }, x => console.log("Tab loaded:", x))
+      });
+  }
 };
 const onRemoveSelectedTabs = () => {
   const selectedIds = CHECKED_CHECKBOXES.selectedIds();
@@ -111,14 +113,13 @@ const onRemoveSelectedTabs = () => {
   });
 
   console.log(removedIds)
-  chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
-    var tmpTabs = {};
-    for (let windowKey in tabsStored[TABS_STORAGE_KEY]) {
-      tmpTabs[windowKey] = tabsStored[TABS_STORAGE_KEY][windowKey].filter(tab => !removedIds.includes(tab.id.toString()));
-    }
-    console.log(tmpTabs)
-    chrome.storage.local.set({ [TABS_STORAGE_KEY]: tmpTabs });
-  });
+  let windowsStored = localStorage.getItem(TABS_STORAGE_KEY);
+  var tmpTabs = {};
+  for (let windowKey in windowsStored[TABS_STORAGE_KEY]) {
+    tmpTabs[windowKey] = windowsStored[TABS_STORAGE_KEY][windowKey].filter(tab => !removedIds.includes(tab.id.toString()));
+  }
+  console.log(tmpTabs)
+  localStorage.setItem(TABS_STORAGE_KEY, JSON.stringify(tmpTabs));
 }
 const onTabCBChange = e => {
   if (checkedByScript)
@@ -197,7 +198,7 @@ document.addEventListener("keyup", e => {
   }
 });
 window.onload = () => {
-  document.getElementById("saveAll").addEventListener("click", onSaveCurrentWindowTabs);
+  //document.getElementById("saveAll").addEventListener("click", onSaveCurrentWindowTabs);
   document.getElementById("loadAll").addEventListener("click", onLoadAllTabs);
   document.getElementById("loadSel").addEventListener("click", onLoadSelectedTabs);
   document.getElementById("remSel").addEventListener("click", onRemoveSelectedTabs);
@@ -213,23 +214,20 @@ window.onload = () => {
 window.onscroll = onScrollStickyTop;
 //#endregion
 
-const buildHtml = () => {
-  chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
-    console.log("*/******************** STORAGE GET")
-    console.log(tabsStored)
-    let wList = document.getElementById(MT_WINDOWSLIST);
+(function buildHtml() {
+  let windowsStored = JSON.parse(localStorage.getItem(TABS_STORAGE_KEY));
+  console.log("*/******************** STORAGE GET")
+  console.log(windowsStored)
+  let wList = document.getElementById(MT_WINDOWSLIST);
 
-    for (let windowKey in tabsStored[TABS_STORAGE_KEY]) {
-      let window = tabsStored[TABS_STORAGE_KEY][windowKey];
-      console.log(window)
-      let windowElem = document.createElement("div");
-      windowElem.classList.add("window");
+  for (let windowKey in windowsStored[TABS_STORAGE_KEY]) {
+    let window = windowsStored[TABS_STORAGE_KEY][windowKey];
+    console.log(window)
+    let windowElem = document.createElement("div");
+    windowElem.classList.add("window");
 
-      window.tabs.forEach(tab => createTabElementIn(windowElem, tab));
-      wList.appendChild(windowElem);
-      wList.appendChild(document.createElement("br"));
-    }
-  });
-}
-
-buildHtml();
+    window.tabs.forEach(tab => createTabElementIn(windowElem, tab));
+    wList.appendChild(windowElem);
+    wList.appendChild(document.createElement("br"));
+  }
+})();

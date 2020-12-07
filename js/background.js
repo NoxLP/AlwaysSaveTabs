@@ -79,18 +79,21 @@ When a window is removed, ask user if store permanently its tabs
 const findWindowIndexByChromeId = id => {
   return myWindows.findIndex(x => x.currentChromeId === id);
 }
+const saveOnLocalStorage = () => {
+  localStorage.setItem(TABS_STORAGE_KEY, JSON.stringify(myWindows));
+}
 /**
  * Save all tabs to local storage. Return index of current window so it can be removed in case the function was called by the remove window event.
  */
 const saveAll = windowId => {
   if (myWindows.length === 1) { //window closing is the only one opened => update local storage
-    chrome.storage.local.set({ [TABS_STORAGE_KEY]: myWindows });
+    saveOnLocalStorage()
     return 0;
   } else if (windowId) { //otherwise ask if user want to store closing window
     let index = findWindowIndexByChromeId(windowId);
     if (window.confirm(MSG_CONFIRM_STORE_CLOSING_WINDOW_TABS)) {
       loadedWindows.push(myWindows[index]);
-      chrome.storage.local.set({ [TABS_STORAGE_KEY]: myWindows });
+      saveOnLocalStorage()
     }
     return index;
   }
@@ -278,13 +281,13 @@ Store every new window
 */
 chrome.tabs.query({}, tabs => {
   console.log("-------------- initial query")
+  console.log("--loaded ", loadedWindows)
   //if there are no windows loaded yet(first window opened), load stored windows
   if (loadedWindows.length === 0) {
-    chrome.storage.local.get(TABS_STORAGE_KEY, windowsStored => {
-      console.log("windowsStored", windowsStored[TABS_STORAGE_KEY])
-      loadedWindows = windowsStored[TABS_STORAGE_KEY] || [];
-      addOrUpdateNewWindow(tabs);
-    });
+    let windowsStored = localStorage.getItem(TABS_STORAGE_KEY);
+    console.log("windowsStored", windowsStored)
+    loadedWindows = windowsStored ? windowsStored[TABS_STORAGE_KEY] || [] : [];
+    addOrUpdateNewWindow(tabs);
   } else {
     console.log("length != 0")
     addOrUpdateNewWindow(tabs);
