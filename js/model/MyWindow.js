@@ -15,8 +15,8 @@ export class MyWindow {
       tabs;
     this.currentChromeId = windowId;
   }
-  static mapFromJSON(JSON) {
-    return new MyWindow(JSON.currentChromeId, JSON.tabs, "JSON");
+  static mapFromJSON(parsedJSON) {
+    return new MyWindow(parsedJSON.currentChromeId, parsedJSON.tabs, "JSON");
   }
   /**
    * Returns if tabs array have the same tabs than this.tabs. Used to check if new opened window's tabs are the same as a stored MyWindow's tabs array.

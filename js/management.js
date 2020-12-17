@@ -220,8 +220,8 @@ window.onscroll = onScrollStickyTop;
   console.log(windowsStored)
   let wList = document.getElementById(MT_WINDOWSLIST);
 
-  for (let windowKey in windowsStored[TABS_STORAGE_KEY]) {
-    let window = windowsStored[TABS_STORAGE_KEY][windowKey];
+  for (let windowStored of windowsStored) {
+    let window = MyWindow.mapFromJSON(windowStored) //windowsStored[TABS_STORAGE_KEY][windowKey];
     console.log(window)
     let windowElem = document.createElement("div");
     windowElem.classList.add("window");

@@ -206,9 +206,11 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 
 //When a window is removed, ask user if store permanently its tabs
 chrome.windows.onRemoved.addListener(windowId => {
+  console.log("---------- window removed")
   let index = saveAll(windowId);
   myWindows.splice(index, 1);
 });
+chrome.windows.onCreated.addListener()
 //#endregion
 
 //#region attach/detach events
