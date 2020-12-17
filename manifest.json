@@ -8,7 +8,7 @@
         "unlimitedStorage"
     ],
     "background": {
-        "page": "background.html",
+        "page": "testsEventsBackground.html",
         "persistent": false
     },
     "browser_action": {

@@ -1,0 +1,26 @@
+//*********************************************************************
+//tab dragged out of chrome window and dropped NOT in another window, but simply dropped the new window created as a totally new window
+
+WINDOW CREATED {alwaysOnTop: false, focused: false, height: 1028, id: 316, incognito: false, …}
+testsEventsBackground.js:22 TAB DETACHED {oldPosition: 38, oldWindowId: 72}
+testsEventsBackground.js:19 TAB ATTACHED {newPosition: 0, newWindowId: 316}
+//*********************************************************************
+
+
+//*********************************************************************
+//drag the only tab existing in the second window and dropped into the first, already existing window
+TAB DETACHED {oldPosition: 0, oldWindowId: 316}
+testsEventsBackground.js:19 TAB ATTACHED {newPosition: 36, newWindowId: 72}
+testsEventsBackground.js:2 WINDOW REMOVED
+//*********************************************************************
+
+
+//*********************************************************************
+//tab dragged out of chrome window and dropped into another existing window
+WINDOW CREATED {alwaysOnTop: false, focused: false, height: 1028, id: 327, incognito: false, …}
+testsEventsBackground.js:22 TAB DETACHED {oldPosition: 38, oldWindowId: 72}
+testsEventsBackground.js:19 TAB ATTACHED {newPosition: 0, newWindowId: 327}
+testsEventsBackground.js:22 TAB DETACHED {oldPosition: 0, oldWindowId: 327}
+testsEventsBackground.js:19 TAB ATTACHED {newPosition: 1, newWindowId: 317}
+testsEventsBackground.js:2 WINDOW REMOVED
+//*********************************************************************
