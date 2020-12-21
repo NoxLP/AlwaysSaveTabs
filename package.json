@@ -1,0 +1,20 @@
+{
+  "name": "AlwaysSaveTabs",
+  "version": "1.0.0",
+  "description": "Chrome extension that save tabs opened on each Chrome's window, so when you have more than one window opened and close the wrong one, you don't lose your tabs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NoxLP/AlwaysSaveTabs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NoxLP/AlwaysSaveTabs/issues"
+  },
+  "homepage": "https://github.com/NoxLP/AlwaysSaveTabs#readme"
+}
