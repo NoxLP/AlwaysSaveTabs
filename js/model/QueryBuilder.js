@@ -1,4 +1,4 @@
-const bodyGetWindowByUrls = urlsArray => {
+export const bodyGetWindowByUrls = urlsArray => {
   return {
     $and: [
       {
@@ -10,9 +10,9 @@ const bodyGetWindowByUrls = urlsArray => {
     ]
   }
 }
-const bodyPatchTabFromWindow = (tabId, updatesObject) => {
+export const bodyPatchTabFromWindow = (tabId, updatesObject) => {
   return [ tabId, updatesObject ]
 }
-const bodyPatchWindowChromeId = newChromeId => {
+export const bodyPatchWindowChromeId = newChromeId => {
   return { currentChromeId: newChromeId }
 }
