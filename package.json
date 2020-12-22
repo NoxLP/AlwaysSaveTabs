@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/NoxLP/AlwaysSaveTabs/issues"
   },
-  "homepage": "https://github.com/NoxLP/AlwaysSaveTabs#readme"
+  "homepage": "https://github.com/NoxLP/AlwaysSaveTabs#readme",
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
 }
