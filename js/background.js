@@ -6,7 +6,7 @@ const api = axios.create({
   timeout: 4000
 })
 const HTML_NAME = 'tabsManagement.html', CHROMEID_NAME = 'currentChromeId', TABID_NAME = 'tabId'
-var mtCreated = null, dragging = false, draggingTimer = null, startOk = false
+var mtCreated = null, dragging = false, draggingTimer = null, startOk = true
 
 //#region helpers
 /**
@@ -33,6 +33,9 @@ const openInNewTabOrSelectExistingTab = url => {
     //SELECT MANAGEMENT TAB
   }
 };
+const buildErrorMessage = err => {
+  return `${err.response.data}\n${err}`
+}
 //#endregion
 
 if(startOk) {
@@ -46,7 +49,7 @@ if(startOk) {
 
   chrome.tabs.onCreated.addListener(tab => {
     console.log('tab created ', tab)
-    
+
     const newTab = QueryBuilder.getObjectFromTab(tab)
 
     if (!mtCreated && tabIsMT(tab))
@@ -57,7 +60,7 @@ if(startOk) {
         console.log(`Tab created succesfully in BD with response:\n${res}`)
       })
       .catch(err => {
-        console.error(`Error creating tab in BD:\n${err}`)
+        console.error(`Error creating tab in BD:\n${buildErrorMessage(err)}`)
       })
   })
 
@@ -72,29 +75,41 @@ if(startOk) {
         console.log(`Tab removed succesfully in BD with response:\n${res}`)
       })
       .catch(err => {
-        console.error(`Error removing tab in BD:\n${err}`)
+        console.error(`Error removing tab in BD:\n${buildErrorMessage(err)}`)
       })
   })
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log('tab updated')
+    console.log('tab updated', tab, changeInfo)
 
+    const relevantProps = ['mutedInfo', 'pinned', 'title', 'url']
     let updatesObject = {}
-    if (changeInfo.mutedInfo)
+    let relevantUpdates = Object.keys(changeInfo).filter(x => relevantProps.includes(x))
+    
+    if(relevantUpdates.length === 0)
+      return;
+
+    for(let update of relevantUpdates) {
+      if(update === 'mutedInfo')
+        updatesObject[muted] = changeInfo.mutedInfo.muted
+
+      updatesObject[update] = changeInfo[update]
+    }
+    /*if (changeInfo.hasOwnProperty('mutedInfo'))
       updatesObject[muted] = changeInfo.mutedInfo.muted
-    if (changeInfo.pinned)
+    if (changeInfo.hasOwnProperty('pinned'))
       updatesObject[pinned] = changeInfo.pinned
-    if (changeInfo.title)
+    if (changeInfo.hasOwnProperty('title'))
       updatesObject[title] = changeInfo.title
-    if (changeInfo.url)
-      updatesObject[url] = changeInfo.url
+    if (changeInfo.hasOwnProperty('url'))
+      updatesObject[url] = changeInfo.url*/
 
     api.patch(`tab?${CHROMEID_NAME}=${tab.windowId}`, QueryBuilder.bodyPatchTabFromWindow(tabId, updatesObject))
       .then(res => {
         console.log(`Tab updated succesfully in BD with response:\n${res}`)
       })
       .catch(err => {
-        console.error(`Error updating tab in BD:\n${err}`)
+        console.error(`Error updating tab in BD:\n${buildErrorMessage(err)}`)
       })
   })
 
@@ -107,7 +122,7 @@ if(startOk) {
           console.log(`Attahed tab created succesfully in BD with response:\n${res}`)
         })
         .catch(err => {
-          console.error(`Error creating attached tab in BD:\n${err}`)
+          console.error(`Error creating attached tab in BD:\n${buildErrorMessage(err)}`)
         })
     })
   })
@@ -120,7 +135,7 @@ if(startOk) {
         console.log(`Detached tab removed succesfully in BD with response:\n${res}`)
       })
       .catch(err => {
-        console.error(`Error removing detached tab in BD:\n${err}`)
+        console.error(`Error removing detached tab in BD:\n${buildErrorMessage(err)}`)
       })
 
     dragging = true;
@@ -135,7 +150,7 @@ if(startOk) {
         console.log(`Window created succesfully in BD with response:\n${res}`)
       })
       .catch(err => {
-        console.error(`Error creating window in BD:\n${err}`)
+        console.error(`Error creating window in BD:\n${buildErrorMessage(err)}`)
       })
   })
 
@@ -148,7 +163,7 @@ if(startOk) {
           console.log(`Window removed succesfully in BD with response:\n${res}`)
         })
         .catch(err => {
-          console.error(`Error removing window in BD:\n${err}`)
+          console.error(`Error removing window in BD:\n${buildErrorMessage(err)}`)
         })
       
       clearTimeout(draggingTimer)
@@ -174,12 +189,12 @@ chrome.tabs.query({}, async (tabs) => {
           })
           .catch(err => {
             startOk = false
-            console.error(`Error creating window in BD:\n${err}`)
+            console.error(`Error creating window in BD:\n${buildErrorMessage(err)}`)
           })
       })
     } else {
       startOk = false
-      console.error(`Error getting window by urls:\n${err}`)
+      console.error(`Error getting window by urls:\n${buildErrorMessage(err)}`)
     }
 
     return;
@@ -195,6 +210,6 @@ chrome.tabs.query({}, async (tabs) => {
     })
     .catch(err => {
       startOk = false
-      console.error(`Error starting window's ids update:\n${err}`)
+      console.error(`Error starting window's ids update:\n${buildErrorMessage(err)}`)
     })
 })
