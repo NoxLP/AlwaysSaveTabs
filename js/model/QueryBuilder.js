@@ -43,10 +43,10 @@ export const getObjectFromTab = tab => {
     selected: tab.selected
   }
 }
-export const getObjectFromWindow = (myWindow, tabs) => {
+export const getObjectFromWindow = tabs => {
   return {
     'tabs': tabs.map(x => getObjectFromTab(x)),
-    currentChromeId: myWindow.id,
+    currentChromeId: tabs[0].windowId,
     creationDate: Date.now()
   }
 }

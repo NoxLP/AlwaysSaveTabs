@@ -6,7 +6,7 @@ const api = axios.create({
   timeout: 4000
 })
 const HTML_NAME = 'tabsManagement.html', CHROMEID_NAME = 'currentChromeId', TABID_NAME = 'tabId'
-var mtCreated = null, dragging = false, draggingTimer = null, startOk = true
+var mtCreated = null, dragging = false, draggingTimer = null, startOk = true, waitForCreatedTab = false
 
 //#region helpers
 /**
@@ -49,7 +49,7 @@ if(startOk) {
 
   chrome.tabs.onCreated.addListener(tab => {
     console.log('tab created ', tab)
-
+    waitForCreatedTab = true
     const newTab = QueryBuilder.getObjectFromTab(tab)
 
     if (!mtCreated && tabIsMT(tab))
@@ -58,9 +58,11 @@ if(startOk) {
     api.post(`tab?${CHROMEID_NAME}=${tab.windowId}`, newTab)
       .then(res => {
         console.log(`Tab created succesfully in BD with response:\n${res}`)
+        waitForCreatedTab = false
       })
       .catch(err => {
         console.error(`Error creating tab in BD:\n${buildErrorMessage(err)}`)
+        waitForCreatedTab = false
       })
   })
 
@@ -82,35 +84,37 @@ if(startOk) {
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log('tab updated', tab, changeInfo)
 
-    const relevantProps = ['mutedInfo', 'pinned', 'title', 'url']
-    let updatesObject = {}
-    let relevantUpdates = Object.keys(changeInfo).filter(x => relevantProps.includes(x))
-    
-    if(relevantUpdates.length === 0)
-      return;
-
-    for(let update of relevantUpdates) {
-      if(update === 'mutedInfo')
-        updatesObject[muted] = changeInfo.mutedInfo.muted
-
-      updatesObject[update] = changeInfo[update]
+    const updateTab = (tabId, changeInfo, tab) => {
+      if(waitForCreatedTab) {
+        console.log('waiting to update tab', tab)
+        setTimeout(() => { updateTab(tabId, changeInfo, tab) }, 250);
+        return;
+      }
+  
+      const relevantProps = ['mutedInfo', 'pinned', 'title', 'url']
+      let updatesObject = {}
+      let relevantUpdates = Object.keys(changeInfo).filter(x => relevantProps.includes(x))
+      
+      if(relevantUpdates.length === 0)
+        return;
+  
+      for(let update of relevantUpdates) {
+        if(update === 'mutedInfo')
+          updatesObject[muted] = changeInfo.mutedInfo.muted
+  
+        updatesObject[update] = changeInfo[update]
+      }
+  
+      api.patch(`tab?${CHROMEID_NAME}=${tab.windowId}`, QueryBuilder.bodyPatchTabFromWindow(tabId, updatesObject))
+        .then(res => {
+          console.log(`Tab updated succesfully in BD with response:\n${res}`)
+        })
+        .catch(err => {
+          console.error(`Error updating tab in BD:\n${buildErrorMessage(err)}`)
+        })
     }
-    /*if (changeInfo.hasOwnProperty('mutedInfo'))
-      updatesObject[muted] = changeInfo.mutedInfo.muted
-    if (changeInfo.hasOwnProperty('pinned'))
-      updatesObject[pinned] = changeInfo.pinned
-    if (changeInfo.hasOwnProperty('title'))
-      updatesObject[title] = changeInfo.title
-    if (changeInfo.hasOwnProperty('url'))
-      updatesObject[url] = changeInfo.url*/
 
-    api.patch(`tab?${CHROMEID_NAME}=${tab.windowId}`, QueryBuilder.bodyPatchTabFromWindow(tabId, updatesObject))
-      .then(res => {
-        console.log(`Tab updated succesfully in BD with response:\n${res}`)
-      })
-      .catch(err => {
-        console.error(`Error updating tab in BD:\n${buildErrorMessage(err)}`)
-      })
+    updateTab(tabId, changeInfo, tab)
   })
 
   chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
@@ -181,17 +185,15 @@ chrome.tabs.query({}, async (tabs) => {
     if(err.response.data === 'No window found with the given parameters') {
       console.warn('No window found with the given parameters, creating initial new window')
 
-      chrome.windows.getCurrent({}, current => {
-        console.log('current window ', current)
-        api.post('window', QueryBuilder.getObjectFromWindow(current, tabs))
-          .then(res => {
-            console.log(`Window created succesfully in BD with response:\n${res}`)
-          })
-          .catch(err => {
-            startOk = false
-            console.error(`Error creating window in BD:\n${buildErrorMessage(err)}`)
-          })
-      })
+      api.post('window', QueryBuilder.getObjectFromWindow(tabs))
+        .then(res => {
+          console.log(`Window created succesfully in BD with response:\n${res}`)
+          startOk = true
+        })
+        .catch(err => {
+          startOk = false
+          console.error(`Error creating window in BD:\n${buildErrorMessage(err)}`)
+        })
     } else {
       startOk = false
       console.error(`Error getting window by urls:\n${buildErrorMessage(err)}`)
@@ -207,6 +209,7 @@ chrome.tabs.query({}, async (tabs) => {
   ])
     .then((res1, res2) => {
       console.log(`Done starting window's ids update:\n${res1}\n\n${res2}`)
+      startOk = true
     })
     .catch(err => {
       startOk = false
