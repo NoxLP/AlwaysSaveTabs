@@ -46,6 +46,7 @@ if(startOk) {
 
   chrome.tabs.onCreated.addListener(tab => {
     console.log('tab created ', tab)
+    
     const newTab = QueryBuilder.getObjectFromTab(tab)
 
     if (!mtCreated && tabIsMT(tab))
@@ -62,6 +63,7 @@ if(startOk) {
 
   chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
     console.log('tab removed ', tabId)
+
     if (mtCreated && mtCreated.tabId === tabId)
       mtCreated = null
 
@@ -73,22 +75,10 @@ if(startOk) {
         console.error(`Error removing tab in BD:\n${err}`)
       })
   })
-  /*
-  const tabSchema = new Schema({
-    url: {type: String, required: true},
-    tabId: {type: String, required: true},
-    title: {type: String, required: true},
-    muted: {type: Boolean, required: true},
-    pinned: {type: Boolean, required: true},
-    selected: {type: Boolean, required: true}
-  })
-  const windowSchema = new Schema({
-    tabs: {type: [tabSchema], required: true},
-    currentChromeId: {type: String, required: true},
-    creationDate: {type: Date, required: true}
-  })
-  */
+
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    console.log('tab updated')
+
     let updatesObject = {}
     if (changeInfo.mutedInfo)
       updatesObject[muted] = changeInfo.mutedInfo.muted
@@ -109,6 +99,8 @@ if(startOk) {
   })
 
   chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
+    console.log('tab attached')
+
     chrome.tabs.get(tabId, tab => {
       api.post(`tab?${CHROMEID_NAME}=${attachInfo.newWindowId}`, QueryBuilder.getObjectFromTab(tab))
         .then(res => {
@@ -121,6 +113,8 @@ if(startOk) {
   })
 
   chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
+    console.log('tab detached')
+
     api.delete(`tab?${CHROMEID_NAME}=${detachInfo.oldWindowId}&${TABID_NAME}=${tabId}`)
       .then(res => {
         console.log(`Detached tab removed succesfully in BD with response:\n${res}`)
@@ -134,6 +128,8 @@ if(startOk) {
   })
 
   chrome.windows.onCreated.addListener(window => {
+    console.log('window created')
+
     api.post('window', QueryBuilder.getObjectFromWindow(window))
       .then(res => {
         console.log(`Window created succesfully in BD with response:\n${res}`)
@@ -144,6 +140,8 @@ if(startOk) {
   })
 
   chrome.windows.onRemoved.addListener(windowId => {
+    console.log('window removed')
+
     if(dragging) {
       api.delete(`window?${CHROMEID_NAME}=${windowId}`)
         .then(res => {
@@ -167,6 +165,7 @@ chrome.tabs.query({}, async (tabs) => {
   } catch(err) {
     if(err.response.data === 'No window found with the given parameters') {
       console.warn('No window found with the given parameters, creating initial new window')
+
       chrome.windows.getCurrent({}, current => {
         console.log('current window ', current)
         api.post('window', QueryBuilder.getObjectFromWindow(current, tabs))
@@ -185,6 +184,7 @@ chrome.tabs.query({}, async (tabs) => {
 
     return;
   }
+
   console.log('bdWindow ', bdWindow)
   Promise.all([
     api.patch(`windowChromeId?_id=${bdWindow._id}`, QueryBuilder.bodyPatchWindowChromeId(tabs[0].windowId)),
