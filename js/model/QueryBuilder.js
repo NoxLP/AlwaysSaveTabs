@@ -28,7 +28,7 @@ export const bodyPatchUpdateTabsIds = (bdWindow, tabs) => {
   bdWindow.tabs.forEach(tab => {
     let tabIndex;
     if((tabIndex = tabs.findIndex(x => x.url === tab.url)) !== -1) {
-      body[tab.tabId] = tabs[tabIndex].tabId
+      body[tab.tabId] = tabs[tabIndex].id
     }
   })
   return body
@@ -36,16 +36,16 @@ export const bodyPatchUpdateTabsIds = (bdWindow, tabs) => {
 export const getObjectFromTab = tab => {
   return {
     url: tab.url,
-    tabId: tab.tabId,
+    tabId: tab.id,
     title: tab.title,
     muted: tab.mutedInfo.muted,
     pinned: tab.pinned,
     selected: tab.selected
   }
 }
-export const getObjectFromWindow = myWindow => {
+export const getObjectFromWindow = (myWindow, tabs) => {
   return {
-    tabs: myWindow.tabs.map(x => getObjectFromTab(x)),
+    'tabs': tabs.map(x => getObjectFromTab(x)),
     currentChromeId: myWindow.id,
     creationDate: Date.now()
   }

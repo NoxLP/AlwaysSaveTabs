@@ -14,5 +14,6 @@
     "browser_action": {
         "default_icon": "./images/tabsIcon.png"
     },
-    "manifest_version": 2
+    "manifest_version": 2,
+    "content_security_policy": "script-src 'self' https://cdn.jsdelivr.net"
 }

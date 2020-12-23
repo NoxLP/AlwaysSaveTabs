@@ -1,6 +1,6 @@
-import * as QueryBuilder from "./model/QueryBuilder";
+import * as QueryBuilder from "./model/QueryBuilder.js";
 
-const axios = require('axios').default;
+//const axios = require('axios').default;
 const api = axios.create({
   baseURL: "http://localhost:3000/",
   timeout: 4000
@@ -160,13 +160,16 @@ if(startOk) {
 }
 
 chrome.tabs.query({}, async (tabs) => {
+  console.log('initial query')
   let bdWindow;
   try {
-    bdWindow = await api.get('windowByURLs', QueryBuilder.bodyGetWindowByUrls(tabs))
+    bdWindow = (await api.get('windowByURLs', QueryBuilder.bodyGetWindowByUrls(tabs))).data
   } catch(err) {
-    if(err === 'Not found window') {
+    if(err.response.data === 'No window found with the given parameters') {
+      console.warn('No window found with the given parameters, creating initial new window')
       chrome.windows.getCurrent({}, current => {
-        api.post('window', QueryBuilder.getObjectFromWindow(current))
+        console.log('current window ', current)
+        api.post('window', QueryBuilder.getObjectFromWindow(current, tabs))
           .then(res => {
             console.log(`Window created succesfully in BD with response:\n${res}`)
           })
@@ -182,7 +185,7 @@ chrome.tabs.query({}, async (tabs) => {
 
     return;
   }
-
+  console.log('bdWindow ', bdWindow)
   Promise.all([
     api.patch(`windowChromeId?_id=${bdWindow._id}`, QueryBuilder.bodyPatchWindowChromeId(tabs[0].windowId)),
     api.patch(`tabsIds?_id=${bdWindow._id}`, QueryBuilder.bodyPatchUpdateTabsIds(bdWindow, tabs))
