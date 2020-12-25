@@ -6,7 +6,7 @@ const api = axios.create({
   timeout: 4000
 })
 const HTML_NAME = 'tabsManagement.html', CHROMEID_NAME = 'currentChromeId', TABID_NAME = 'tabId'
-var mtCreated = null, dragging = false, draggingTimer = null, startOk = true, waitForCreatedTab = false
+var mtCreated = null, dragging = false, draggingTimer = null, startOk = true
 
 //#region helpers
 /**
@@ -83,38 +83,28 @@ if(startOk) {
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log('tab updated', tab, changeInfo)
+  
+    const relevantProps = ['mutedInfo', 'pinned', 'title', 'url']
+    let updatesObject = {}
+    let relevantUpdates = Object.keys(changeInfo).filter(x => relevantProps.includes(x))
+    
+    if(relevantUpdates.length === 0)
+      return;
 
-    const updateTab = (tabId, changeInfo, tab) => {
-      if(waitForCreatedTab) {
-        console.log('waiting to update tab', tab)
-        setTimeout(() => { updateTab(tabId, changeInfo, tab) }, 250);
-        return;
-      }
-  
-      const relevantProps = ['mutedInfo', 'pinned', 'title', 'url']
-      let updatesObject = {}
-      let relevantUpdates = Object.keys(changeInfo).filter(x => relevantProps.includes(x))
-      
-      if(relevantUpdates.length === 0)
-        return;
-  
-      for(let update of relevantUpdates) {
-        if(update === 'mutedInfo')
-          updatesObject[muted] = changeInfo.mutedInfo.muted
-  
-        updatesObject[update] = changeInfo[update]
-      }
-  
-      api.patch(`tab?${CHROMEID_NAME}=${tab.windowId}`, QueryBuilder.bodyPatchTabFromWindow(tabId, updatesObject))
-        .then(res => {
-          console.log(`Tab updated succesfully in BD with response:\n${res}`)
-        })
-        .catch(err => {
-          console.error(`Error updating tab in BD:\n${buildErrorMessage(err)}`)
-        })
+    for(let update of relevantUpdates) {
+      if(update === 'mutedInfo')
+        updatesObject[muted] = changeInfo.mutedInfo.muted
+
+      updatesObject[update] = changeInfo[update]
     }
 
-    updateTab(tabId, changeInfo, tab)
+    api.patch(`tab?${CHROMEID_NAME}=${tab.windowId}`, QueryBuilder.bodyPatchTabFromWindow(tabId, updatesObject))
+      .then(res => {
+        console.log(`Tab updated succesfully in BD with response:\n${res}`)
+      })
+      .catch(err => {
+        console.error(`Error updating tab in BD:\n${buildErrorMessage(err)}`)
+      })
   })
 
   chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
@@ -147,15 +137,17 @@ if(startOk) {
   })
 
   chrome.windows.onCreated.addListener(window => {
-    console.log('window created')
+    console.log('window created ', window)
 
-    api.post('window', QueryBuilder.getObjectFromWindow(window))
-      .then(res => {
-        console.log(`Window created succesfully in BD with response:\n${res}`)
-      })
-      .catch(err => {
-        console.error(`Error creating window in BD:\n${buildErrorMessage(err)}`)
-      })
+    chrome.tabs.query({windowId: window.id}, tabs => {
+      api.post('window', QueryBuilder.getObjectFromWindow(tabs))
+        .then(res => {
+          console.log(`Window created succesfully in BD with response:\n${res}`)
+        })
+        .catch(err => {
+          console.error(`Error creating window in BD:\n${buildErrorMessage(err)}`)
+        })
+    })
   })
 
   chrome.windows.onRemoved.addListener(windowId => {
@@ -177,10 +169,12 @@ if(startOk) {
 }
 
 chrome.tabs.query({}, async (tabs) => {
-  console.log('initial query')
+  console.log('initial query ', QueryBuilder.bodyGetWindowByUrls(tabs))
   let bdWindow;
   try {
-    bdWindow = (await api.get('windowByURLs', QueryBuilder.bodyGetWindowByUrls(tabs))).data
+    bdWindow = (await api.post('windowByURLs', { body: QueryBuilder.bodyGetWindowByUrls(tabs) 
+    }
+    )).data
   } catch(err) {
     if(err.response.data === 'No window found with the given parameters') {
       console.warn('No window found with the given parameters, creating initial new window')
@@ -213,6 +207,6 @@ chrome.tabs.query({}, async (tabs) => {
     })
     .catch(err => {
       startOk = false
-      console.error(`Error starting window's ids update:\n${buildErrorMessage(err)}`)
+      console.error(`Error starting window's ids update:\n${JSON.stringify(buildErrorMessage(err))}`)
     })
 })
