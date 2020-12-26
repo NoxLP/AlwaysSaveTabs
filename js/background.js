@@ -34,11 +34,11 @@ const openInNewTabOrSelectExistingTab = url => {
   }
 };
 const buildErrorMessage = err => {
-  return `${err.response.data}\n${err}`
+  return `${(err.response ? err.response.data + '\n' : '')}${err}`
 }
 //#endregion
 
-if(startOk) {
+if (startOk) {
   /**
    * Event for opening extension management tab
    */
@@ -49,7 +49,6 @@ if(startOk) {
 
   chrome.tabs.onCreated.addListener(tab => {
     console.log('tab created ', tab)
-    waitForCreatedTab = true
     const newTab = QueryBuilder.getObjectFromTab(tab)
 
     if (!mtCreated && tabIsMT(tab))
@@ -58,17 +57,18 @@ if(startOk) {
     api.post(`tab?${CHROMEID_NAME}=${tab.windowId}`, newTab)
       .then(res => {
         console.log(`Tab created succesfully in BD with response:\n${res}`)
-        waitForCreatedTab = false
       })
       .catch(err => {
         console.error(`Error creating tab in BD:\n${buildErrorMessage(err)}`)
-        waitForCreatedTab = false
       })
   })
 
   chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
     console.log('tab removed ', tabId)
 
+    if (removeInfo.isWindowClosing)
+      return
+      
     if (mtCreated && mtCreated.tabId === tabId)
       mtCreated = null
 
@@ -83,16 +83,16 @@ if(startOk) {
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log('tab updated', tab, changeInfo)
-  
+
     const relevantProps = ['mutedInfo', 'pinned', 'title', 'url']
     let updatesObject = {}
     let relevantUpdates = Object.keys(changeInfo).filter(x => relevantProps.includes(x))
-    
-    if(relevantUpdates.length === 0)
+
+    if (relevantUpdates.length === 0)
       return;
 
-    for(let update of relevantUpdates) {
-      if(update === 'mutedInfo')
+    for (let update of relevantUpdates) {
+      if (update === 'mutedInfo')
         updatesObject[muted] = changeInfo.mutedInfo.muted
 
       updatesObject[update] = changeInfo[update]
@@ -139,7 +139,7 @@ if(startOk) {
   chrome.windows.onCreated.addListener(window => {
     console.log('window created ', window)
 
-    chrome.tabs.query({windowId: window.id}, tabs => {
+    chrome.tabs.query({ windowId: window.id }, tabs => {
       api.post('window', QueryBuilder.getObjectFromWindow(tabs))
         .then(res => {
           console.log(`Window created succesfully in BD with response:\n${res}`)
@@ -153,7 +153,7 @@ if(startOk) {
   chrome.windows.onRemoved.addListener(windowId => {
     console.log('window removed')
 
-    if(dragging) {
+    if (dragging) {
       api.delete(`window?${CHROMEID_NAME}=${windowId}`)
         .then(res => {
           console.log(`Window removed succesfully in BD with response:\n${res}`)
@@ -161,7 +161,7 @@ if(startOk) {
         .catch(err => {
           console.error(`Error removing window in BD:\n${buildErrorMessage(err)}`)
         })
-      
+
       clearTimeout(draggingTimer)
       dragging = false
     }
@@ -172,11 +172,9 @@ chrome.tabs.query({}, async (tabs) => {
   console.log('initial query ', QueryBuilder.bodyGetWindowByUrls(tabs))
   let bdWindow;
   try {
-    bdWindow = (await api.post('windowByURLs', { body: QueryBuilder.bodyGetWindowByUrls(tabs) 
-    }
-    )).data
-  } catch(err) {
-    if(err.response.data === 'No window found with the given parameters') {
+    bdWindow = (await api.post('windowByURLs', QueryBuilder.bodyGetWindowByUrls(tabs))).data
+  } catch (err) {
+    if (err.response && err.response.data === 'No window found with the given parameters') {
       console.warn('No window found with the given parameters, creating initial new window')
 
       api.post('window', QueryBuilder.getObjectFromWindow(tabs))
