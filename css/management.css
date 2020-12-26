@@ -2,105 +2,90 @@ body {
   padding: 0px;
   background-color: rgb(243, 243, 243);
 }
-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  align-content: center;
-  height: 8vh;
-  width: 99vw;
-  margin: -8px 0px 0px -8px;
-  border: 0px;
-  background-color: rgb(51, 103, 214);
-  box-sizing: border-box;
-  padding: 2.5vh 0 2.5vh 0;
-}
-header > h1, p {
-  margin: 0;
-  color: white;
-}
-#webBody {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-content: stretch;
-}
 aside {
-  position: sticky;
-  top: 0px;
-  padding: 20px 0px 20px 20px;
-  height: fit-content;
-  max-height: 180px;
-  min-width: 300px;
-  width: 10vw;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: left;
-  margin: 0px 0px 0px -9px;
-  /*background-color: white;
-  /*border: 1px solid lightgray; /*rgba(124, 159, 236, 0.3);*/
-  /*border-radius: 0px 0px 20px 0px;*/
+  align-items: flex-start;
+  width: 250px;
+  margin-left: -5px;
+  background-color: transparent !important;
+  border: none !important;
 }
 aside > button {
-  height: 30px;
   width: 175px;
-  background-color: white; /* rgb(254, 254, 254);*/
+  background-color: white !important; /* rgb(254, 254, 254);*/
   color:  rgb(67, 114, 216);
   border: 1px solid lightgray;
-  border-radius: 4px;
-  margin: 10px 0px 0px -5px;
-  font-weight: bold;
 }
 aside > button:hover {
-  background-color: rgba(169, 203, 219, 0.205);
-  border-color: rgb(0, 110, 255);
+  background-color: rgba(51, 103, 214, 0.075);;
 }
-aside > label {
-  height: 34px;
-  width: 250px;
-  margin: 10px 0px 0px -5px;
-  padding-right: 3px;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -o-box-sizing: border-box;
-  -ms-box-sizing: border-box;
-  box-sizing: border-box; 
-  background-color: white; /* rgb(254, 254, 254);*/
-  border: 1px solid lightgray;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
+.btn:focus {
+  box-shadow: none;
 }
-label > img {
-  height: 18px;
+.form-control:focus {
+  box-shadow: none;
+}
+.form-check-input:focus {
+  box-shadow: none;
+}
+.no-gutter > [class*='col-'] {
+  padding-right:0;
+  padding-left:0;
+}
+.collapse-when-desktop {
+  display: none !important;
+}
+.row {
+  width: 100% !important;
+}
+.noMarginNoPadding {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.options-icon > div {
+  width: 16px;
+  height: 2px;
+  background-color: white;
+  margin-top: 3.8px;
+  border-radius: 25px;
+}
+.options-dark {
+  background-color: white;
+  height: 100px;
+}
+.options-dark > div {
   width: 25px;
-  margin-left: 3px;
-  background-color: transparent;
-}
-label > input {
-  width: 200px;
-  height: 30px;
-  margin-right: 5px;
-  color: black;
-  border: none;
-  border-radius: 5px;
-  outline: none;
-  background-color: transparent;/*  rgb(254, 254, 254);*/
-}
-label > input::placeholder {
-  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  /*color: rgb(170, 170, 170);*/
-  color:  rgba(67, 114, 216, 0.35);
+  height: 3px;
+  background-color: rgb(51, 103, 214);
 }
 
-.filterHoverFocus {
-  background-color: rgba(169, 203, 219, 0.205);
-  border-color: rgb(0, 110, 255);
+@media (max-width: 576px) {
+  .collapse-when-desktop {
+    display: flex !important;
+  }
+  .collapse-when-mobile {
+    display: none !important;
+  }
+  .show-when-desktop {
+    display: none !important;
+  }
+  #title {
+    margin-left: -10px;
+  }
 }
-
-#saveAll {
-  height: 40px;
+@media (min-width: 641px) and (max-width: 768px) {
+  .collapse-when-desktop {
+    display: flex !important;
+  }
+  .show-when-desktop {
+    display: none !important;
+  }
+  .inline-when-tablet {
+    display: inline-block;
+  }
+  #title {
+    margin-left: -20px;
+  }
 }

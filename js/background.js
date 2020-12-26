@@ -1,6 +1,5 @@
 import * as QueryBuilder from "./model/QueryBuilder.js";
 
-//const axios = require('axios').default;
 const api = axios.create({
   baseURL: "http://localhost:3000/",
   timeout: 4000

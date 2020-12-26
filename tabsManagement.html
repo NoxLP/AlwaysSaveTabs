@@ -1,32 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/management.css">
-    <link rel="stylesheet" href="./css/windowTabsFrameStyles.css">
     <link rel="shortcut icon" href="images\tabsIcon.png" type="image/x-icon">
-    <script src="./js/management.js" type="module"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/management.css">
+    <link rel="stylesheet" href="./css/header.css">
     <title>Document</title>
 </head>
 <body>
-    <header>
-        <h1>Tab management</h1>
-        <p>Mostrando pestañas guardadas actualmente ordenadas por ventanas</p>
-    </header>
-    <section id="webBody">
-        <aside>
-            <button id="saveAll">Save tabs of current window</button>
-            <button id="loadAll">Load all</button>
-            <button id="loadSel">Load selected</button>
-            <button id="remSel">Remove selected</button>
-            <label class="filter">
-                <img src="./images/filterIcon.png" alt="filter">
-                <input id="filterInput" type="text" placeholder="Filtro">
-            </label>
-        </aside>
-        <section id="windowsList">
-        </section>
+  <header class="container-fluid">
+    <div class="row justify-content-start no-gutter flex-nowrap">
+      <div class="col-2 collapse-when-desktop">
+        <button class="btn mt-md-3 options-icon" id="mobile-options" role="button"
+        data-bs-toggle="dropdown" aria-expanded="false">
+          <div></div>
+          <div></div>
+          <div></div>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="mobile-options">
+          <li>
+            <a href="#" class="dropdown-item">
+              Load window
+            </a>
+          </li>
+          <li>
+            <a href="#" class="dropdown-item">
+              Load selected
+            </a>
+          </li>
+          <li>
+            <a href="#" class="dropdown-item">
+              Remove window
+            </a>
+          </li>
+          <li>
+            <a href="#" class="dropdown-item">
+              Remove selected
+            </a>
+          </li>
+          <li>
+            <div class="input-group flex-nowrap px-3 mt-2">
+              <span class="input-group-text filter-Icon" id="filterIconWrapper">
+                <img id="filterIcon" src="./images/filterIcon.png" alt="">
+              </span>
+              <input id="filterInput" type="text" class="form-control" placeholder="Filter" aria-label="Filter" aria-describedby="addon-wrapping">
+            </div>
+          </li>
+        </ul>
+      </div>
+      <h2 class="col-9 col-lg mt-1 mt-md-3" id="title">Tab management</h2>
+    </div>
+    <div class="row collapse-when-mobile">
+      <p class="col">Mostrando pestañas guardadas actualmente ordenadas por ventanas</p>
+    </div>
+  </header>
+  <section class="d-flex align-content-stretch">
+    <aside class="card collapse-when-mobile-and-tablet sticky-top mt-4 show-when-desktop">
+      <button class="btn border ms-3 mt-2" type="button" id="loadWindow">Load window</button>
+      <button class="btn border ms-3 mt-2" type="button" id="loadSel">Load selected</button>
+      <button class="btn border ms-3 mt-2" type="button" id="remWindow">Remove window</button>
+      <button class="btn border ms-3 mt-2" type="button" id="remSel">Remove selected</button>
+      <div class="input-group flex-nowrap px-3 mt-2 mb-3">
+        <span class="input-group-text filter-Icon" id="filterIconWrapper">
+          <img id="filterIcon" src="./images/filterIcon.png" alt="">
+        </span>
+        <input id="filterInput" type="text" class="form-control" placeholder="Filter" aria-label="Filter" aria-describedby="addon-wrapping">
+      </div>
+    </aside>
+    <section id="windowsSection" class="accordion mt-4 flex-grow-1 mx-2 mx-md-3 mx-xl-5">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="header145">
+          <button id="window145" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse145" aria-expanded="true" aria-controls="collapse145">
+            Nombre ventana - fecha ventana
+          </button>
+        </h2>
+        <div class="d-flex flex-column">
+          <div class="d-flex flex-row justify-content-between align-items-center mx-2">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="tab652CBox">
+            </div>
+            <img class="img-thumbnail ms-3" src="#" alt="web icon">
+            <a class="flex-grow-1" target="_blank" href="${tab.url}">
+              <span class="ms-3">tab.title</span>
+              <span class="ms-3">domain</span>
+            </a>
+            <br>
+          </div>
+        </div>
+      </div>
     </section>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+  <script src="./js/management.js" type="module"></script>
 </body>
 </html>
