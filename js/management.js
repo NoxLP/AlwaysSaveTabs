@@ -10,30 +10,27 @@ const CHECKED_CHECKBOXES = {
   last: 0,
   selectedIds: function () { return CHECKED_CHECKBOXES.CBs.filter(x => document.getElementById(x).checked) }
 };
-const WINDOWS_ID_SECTION = 'windowsSection', WINDOWS_ID_EDIT_TITLE = 'editWindowTitleB', TABS_ID_CHECKBOX = 'tabCBox', CHROMEID_NAME = 'currentChromeId'
+const WINDOWS_ID_SECTION = 'windowsSection', WINDOWS_ID_EDIT_BUTTON = 'editWindowTitleB', TABS_ID_CHECKBOX = 'tabCBox', CHROMEID_NAME = 'currentChromeId'
 var shift = false, checkedByScript = false, filterCaseSensitive = false;
 
 //#region helpers
-/*
-<section id="windowsSection" class="accordion mt-4 flex-grow-1 mx-2 mx-md-3 mx-xl-5">
-  <div class="accordion-item">
-    
-    
-          
-        </div>
-</section>
-*/
-const buildWindowEditButtonId = myWindow => `${WINDOWS_ID_EDIT_TITLE}${myWindow[CHROMEID_NAME]}`
-const buildTabCheckboxId = tab => `${TABS_ID_CHECKBOX}${tab.tabId}`
-const buildCollapseWindowId = myWindow => `collapse${myWindow[CHROMEID_NAME]}`
+const buildWindowEditButtonId = myWindow => `${WINDOWS_ID_EDIT_BUTTON}${myWindow[CHROMEID_NAME]}`
+const buildWindowEditInputGroupId = myWindow => `editWindowTitleIGroup${myWindow[CHROMEID_NAME]}`
+const buildWindowEditInputId = myWindow => `editWindowTitleInput${myWindow[CHROMEID_NAME]}`
+const buildWindowEditOkId = myWindow => `editWindowTitleOk${myWindow[CHROMEID_NAME]}`
 const buildWindowCollapseButtonId = myWindow => `windowB${myWindow[CHROMEID_NAME]}`
+const buildTabCheckboxId = tab => `${TABS_ID_CHECKBOX}${tab.tabId}`
+const buildWindowBodyParentId = myWindow => `collapse${myWindow[CHROMEID_NAME]}`
+const getWindowIdFromEditButton = button => button.id.slice(WINDOWS_ID_EDIT_BUTTON.length)
 
 const createWindowHTML = myWindow => {
   let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
   let editTitleButtonId = buildWindowEditButtonId(myWindow)
+  let editTitleOkId = buildWindowEditOkId(myWindow)
   let headerId = `header${myWindow[CHROMEID_NAME]}`
-  let collapseId = buildCollapseWindowId(myWindow)
+  let collapseId = buildWindowBodyParentId(myWindow)
   let windowDiv = document.createElement('div')
+
   windowDiv.classList.add('accordion-item')
   windowDiv.innerHTML = `<h2 class="accordion-header d-flex flex-row border" id="${headerId}">
   <button class="btn mb-1" id="${editTitleButtonId}">
@@ -42,7 +39,11 @@ const createWindowHTML = myWindow => {
       <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
     </svg>
   </button>
-  <button id="${buildWindowCollapseButtonId(myWindow)}" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
+  <div class="input-group collapse" id="${buildWindowEditInputGroupId(myWindow)}">
+    <input id="${buildWindowEditInputId(myWindow)}" type="text" class="form-control" placeholder="New window name" aria-label="New window name" aria-describedby="${editTitleOkId}">
+    <button class="btn btn-outline-secondary" type="button" id="${editTitleOkId}">Ok</button>
+  </div>
+  <button id="${buildWindowCollapseButtonId(myWindow)}" class="accordion-button collapsed visible" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
   <b>Ventana:</b>${myWindow.title ? '&emsp;' + myWindow.title : '&emsp;windowTitle&nbsp;'} - ${(new Date(myWindow.creationDate)).toLocaleDateString()}
   </button>
 </h2>
@@ -52,6 +53,8 @@ const createWindowHTML = myWindow => {
   </div>
 </div>`
   windowsSection.appendChild(windowDiv)
+  document.getElementById(editTitleButtonId).addEventListener('click', onEditWindowNameClick)
+  document.getElementById(editTitleOkId).addEventListener('click', onEditWindowNameOk)
 }
 const buildTabElements = tab => {
   let domain = (tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im) ||[])[0];
@@ -71,6 +74,26 @@ const buildTabElements = tab => {
 //#endregion
 
 //#region events callbacks
+const onEditWindowNameClick = e => {
+  console.log('edit button click', e.target.parentNode)
+  let windowId = getWindowIdFromEditButton(e.target.parentNode)
+  let myWindow = {[CHROMEID_NAME]: windowId}
+  console.log(myWindow)
+  console.log(buildWindowCollapseButtonId(myWindow))
+  let windowCollButton = document.getElementById(buildWindowCollapseButtonId(myWindow))
+  let windowInputGroup = document.getElementById(buildWindowEditInputGroupId(myWindow))
+
+  if(!windowCollButton.classList.contains('collapse')) {
+    windowCollButton.classList.add('collapse')
+    windowInputGroup.classList.remove('collapse')
+  } else {
+    windowCollButton.classList.remove('collapse')
+    windowInputGroup.classList.add('collapse')
+  }
+}
+const onEditWindowNameOk = e => {
+
+}
 const onTabCBChange = e => {
 
 }
@@ -127,6 +150,6 @@ const initialBDError = () => {
   myWindows.forEach(x => {
     createWindowHTML(x)
   })
-  document.getElementById(buildCollapseWindowId(myWindows[0])).classList.add('show')
+  document.getElementById(buildWindowBodyParentId(myWindows[0])).classList.add('show')
   document.getElementById(buildWindowCollapseButtonId(myWindows[0])).classList.remove('collapsed')
 })();
