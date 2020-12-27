@@ -63,8 +63,6 @@ aside > button:hover {
   border: none;
   box-shadow: none !important;
   background-color: white !important;
-  border-top-left-radius: .25rem;
-  border-top-right-radius: .25rem;
 }
 .tab-icon {
   width: 20px;

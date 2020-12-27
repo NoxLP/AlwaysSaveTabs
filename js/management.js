@@ -26,6 +26,7 @@ var shift = false, checkedByScript = false, filterCaseSensitive = false;
 const buildWindowEditButtonId = myWindow => `${WINDOWS_ID_EDIT_TITLE}${myWindow[CHROMEID_NAME]}`
 const buildTabCheckboxId = tab => `${TABS_ID_CHECKBOX}${tab.tabId}`
 const buildCollapseWindowId = myWindow => `collapse${myWindow[CHROMEID_NAME]}`
+const buildWindowCollapseButtonId = myWindow => `windowB${myWindow[CHROMEID_NAME]}`
 
 const createWindowHTML = myWindow => {
   let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
@@ -41,7 +42,7 @@ const createWindowHTML = myWindow => {
       <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
     </svg>
   </button>
-  <button id="windowB${myWindow[CHROMEID_NAME]}" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
+  <button id="${buildWindowCollapseButtonId(myWindow)}" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
   <b>Ventana:</b>${myWindow.title ? '&emsp;' + myWindow.title : '&emsp;windowTitle&nbsp;'} - ${(new Date(myWindow.creationDate)).toLocaleDateString()}
   </button>
 </h2>
@@ -126,6 +127,6 @@ const initialBDError = () => {
   myWindows.forEach(x => {
     createWindowHTML(x)
   })
-  let firstWindow = document.getElementById(buildCollapseWindowId(myWindows[0]))
-  firstWindow.classList.add('show')
+  document.getElementById(buildCollapseWindowId(myWindows[0])).classList.add('show')
+  document.getElementById(buildWindowCollapseButtonId(myWindows[0])).classList.remove('collapsed')
 })();
