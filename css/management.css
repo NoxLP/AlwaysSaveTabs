@@ -51,14 +51,14 @@ aside > button:hover {
   margin-top: 3.8px;
   border-radius: 25px;
 }
-.options-dark {
-  background-color: white;
-  height: 100px;
+.accordion-header {
+  background-color: #e7f1ff;
+  border-top-left-radius: .25rem;
+  border-top-right-radius: .25rem;
 }
-.options-dark > div {
-  width: 25px;
-  height: 3px;
-  background-color: rgb(51, 103, 214);
+.accordion-button {
+  border: none;
+  box-shadow: none !important;
 }
 
 @media (max-width: 576px) {
