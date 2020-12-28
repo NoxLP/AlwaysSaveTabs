@@ -1,5 +1,6 @@
 import * as QueryBuilder from "./model/QueryBuilder.js";
 import * as Helpers from "./helpers.js";
+import * as Exceptions from "./exceptions.js";
 import { buildWindowBodyParentId, buildWindowCollapseButtonId } from "./stringBuilding.js";
 
 const api = axios.create({
@@ -61,13 +62,45 @@ const onTabCBChange = e => {
 const onLoadWindow = () => {
   let id = Helpers.getSelectedWindowId()
   if (!id) {
+    Exceptions.exceptionNoWindowSelected()
     return
   }
   
   console.log('on load window', id)
+  api.get(`window?${CHROMEID_NAME}=${id}`)
+    .then(res => {
+      console.log('window get: ', res.data)
+      res.data[0].tabs.forEach(tab => {
+        chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab), x => console.log("Tab loaded: ", x))
+      })
+    })
+    .catch(err => {
+      console.log("Error trying to get window's tab: ", err)
+    })
 }
 const onLoadWindowNew = () => {
-
+  let id = Helpers.getSelectedWindowId()
+  if (!id) {
+    Exceptions.exceptionNoWindowSelected()
+    return
+  }
+  
+  console.log('on load window', id)
+  api.get(`window?${CHROMEID_NAME}=${id}`)
+    .then(res => {
+      console.log('window get: ', res.data)
+      
+      chrome.windows.create({ focused: true }, w => {
+        console.log('window get: ', res.data)
+        res.data[0].tabs.forEach(tab => {
+          chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab, w.id), 
+            x => console.log("Tab loaded: ", x))
+          })
+      })
+    })
+    .catch(err => {
+      console.log("Error trying to get window's tab: ", err)
+    })
 }
 const onLoadSelected = () => {
 
@@ -108,16 +141,12 @@ window.onload = () => {
 }
 //#endregion
 
-const initialBDError = () => {
-  //************************* TODO ******************************
-
-}
 (async function buildHTML() {
   let myWindows;
   try {
     myWindows = (await api.get('windows')).data
   } catch (err) {
-    initialBDError()
+    Exceptions.exceptionInitialBD()
     return
   }
   console.log(myWindows)

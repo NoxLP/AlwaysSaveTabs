@@ -3,6 +3,7 @@ import * as StringBuilding from "./stringBuilding.js";
 
 export const createWindowHTML = myWindow => {
   let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
+  windowsSection.innerHTML = ''
   let editTitleButtonId = StringBuilding.buildWindowEditButtonId(myWindow)
   let editTitleOkId = StringBuilding.buildWindowEditOkId(myWindow)
   let headerId = `header${myWindow[CHROMEID_NAME]}`
@@ -64,4 +65,14 @@ export const getSelectedWindowId = () => {
     return null
 
   return StringBuilding.getWindowIdFromElementId(windows[0])
+}
+export const getChromeTabFromBDTab = (bdTab, windowId) => {
+  let tab = {
+    url: bdTab.url,
+    pinned: bdTab.pined,
+    selected: bdTab.selected
+  }
+  if(windowId)
+    tab['windowId'] = windowId
+  return tab
 }
