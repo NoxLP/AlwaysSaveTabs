@@ -33,14 +33,15 @@ header {
 #options-div {
   width: 40px !important;
 }
-#filterIconWrapper {
+.filterIconWrapper {
   width: 30px;
   height: 35px;
 }
-#filterIcon {
+.filterIcon {
   margin-left: -10px;
   width: 25px;
 }
-#filterInput {
+.filterInput {
   height: 35px;
+  width: 100%;
 }

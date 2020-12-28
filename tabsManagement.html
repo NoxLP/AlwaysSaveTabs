@@ -48,15 +48,16 @@
           </li>
           <li>
             <div class="input-group flex-nowrap px-3 mt-2">
-              <span class="input-group-text filter-Icon" id="filterIconWrapper">
-                <img id="filterIcon" src="./images/filterIcon.png" alt="">
+              <span class="input-group-text filterIconWrapper" id="filterIconWrapper">
+                <img id="filterIcon" class="filterIcon" src="./images/filterIcon.png" alt="">
               </span>
-              <input id="filterInput" type="text" class="form-control" placeholder="Filter" aria-label="Filter" aria-describedby="addon-wrapping">
+              <input id="filterInput" type="text" class="form-control filterInput" placeholder="Filter" aria-label="Filter" aria-describedby="addon-wrapping">
             </div>
           </li>
         </ul>
       </div>
       <h2 class="col-9 col-lg mt-1 mt-md-3" id="title">Tab management</h2>
+      
     </div>
     <div class="row collapse-when-mobile">
       <p class="col">Pestañas ordenadas por ventanas</p>
@@ -68,15 +69,19 @@
         <input class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
         Guarda ventanas con solo una pestaña
       </label>
-      <button class="btn border ms-3 mt-3" type="button" id="loadWindow">Cargar ventana</button>
-      <button class="btn border ms-3 mt-2" type="button" id="loadSel">Cargar seleccionados</button>
-      <button class="btn border ms-3 mt-2" type="button" id="remWindow">Borrar ventana</button>
-      <button class="btn border ms-3 mt-2" type="button" id="remSel">Borrar seleccionados</button>
+      <hr class="mt-3 mb-0">
+      <button class="btn mt-2" type="button" id="loadWindow">Cargar ventana</button>
+      <button class="btn mt-2" type="button" id="loadWindowNew">Cargar ventana en nueva ventana</button>
+      <button class="btn mt-2" type="button" id="loadSel">Cargar seleccionados</button>
+      <button class="btn mt-2" type="button" id="loadSelNew">Cargar seleccionados en nueva ventana</button>
+      <button class="btn mt-2" type="button" id="remWindow">Borrar ventana</button>
+      <button class="btn mt-2" type="button" id="remSel">Borrar seleccionados</button>
+      <hr class="mt-3 mb-0">
       <div class="input-group flex-nowrap px-3 mt-3 mb-3">
-        <span class="input-group-text filter-Icon" id="filterIconWrapper">
-          <img id="filterIcon" src="./images/filterIcon.png" alt="">
+        <span class="input-group-text filterIconWrapper" id="filterIconWrapperAside">
+          <img id="filterIconAside" class="filterIcon" src="./images/filterIcon.png" alt="">
         </span>
-        <input id="filterInput" type="text" class="form-control" placeholder="Filtro" aria-label="Filter" aria-describedby="addon-wrapping">
+        <input id="filterInputAside" type="text" class="form-control filterInput" placeholder="Filtro" aria-label="Filter" aria-describedby="addon-wrapping">
       </div>
     </aside>
     <section id="windowsSection" class="accordion flex-grow-1 flex-nowrap mt-4 mx-2 mx-md-3 mx-xl-5">

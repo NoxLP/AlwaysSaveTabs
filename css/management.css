@@ -8,15 +8,21 @@ aside {
   margin-left: -5px;
   background-color: transparent !important;
   border: none !important;
+  font-size: 13px;
 }
 aside > button {
-  width: 175px;
-  background-color: white !important; /* rgb(254, 254, 254);*/
-  color:  rgb(67, 114, 216);
-  border: 1px solid lightgray;
+  width: 100%;
+  text-align: left !important;
+  font-size: 13px !important;
+  /*background-color: white !important; /* rgb(254, 254, 254);*/
+  /*color:  rgb(67, 114, 216);*/
+  /*border: 1px solid lightgray;*/
 }
 aside > button:hover {
   background-color: rgba(51, 103, 214, 0.075) !important;
+}
+aside > hr {
+  width: 100%;
 }
 .btn:focus {
   box-shadow: none;
