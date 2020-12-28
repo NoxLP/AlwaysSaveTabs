@@ -139,6 +139,9 @@ if (startOk) {
     console.log('window created ', window)
 
     chrome.tabs.query({ windowId: window.id }, tabs => {
+      if(tabs.length < 2)
+        return
+        
       api.post('window', QueryBuilder.getObjectFromWindow(tabs))
         .then(res => {
           console.log(`Window created succesfully in BD with response:\n${res}`)

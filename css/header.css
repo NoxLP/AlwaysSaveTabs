@@ -16,12 +16,22 @@ header {
 .testBorder {
   border: solid 1px red;
 }
-#mobile-options {
+.options-icon > div {
+  width: 16px;
+  height: 2px;
+  background-color: white;
+  margin-top: 3.8px;
+  border-radius: 25px;
+}
+#mobile-menu {
   width: 15px;
   margin-top: -3px;
   border: none;
   outline: none;
   background-color: transparent;
+}
+#options-div {
+  width: 40px !important;
 }
 #filterIconWrapper {
   width: 30px;

@@ -21,7 +21,13 @@
         </button>
         <ul class="dropdown-menu" aria-labelledby="mobile-options">
           <li>
-            <a href="#" class="dropdown-item">
+            <label class="ms-3 me-2 mt-2">
+              <input class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
+              Guarda ventanas con solo una pestaña
+            </label>
+          </li>
+          <li>
+            <a href="#" class="dropdown-item mt-1">
               Load window
             </a>
           </li>
@@ -53,16 +59,20 @@
       <h2 class="col-9 col-lg mt-1 mt-md-3" id="title">Tab management</h2>
     </div>
     <div class="row collapse-when-mobile">
-      <p class="col">Mostrando pestañas guardadas actualmente ordenadas por ventanas</p>
+      <p class="col">Pestañas ordenadas por ventanas</p>
     </div>
   </header>
   <section class="d-flex align-content-stretch">
-    <aside class="card collapse-when-mobile-and-tablet sticky-top mt-4 show-when-desktop">
-      <button class="btn border ms-3 mt-2" type="button" id="loadWindow">Cargar ventana</button>
+    <aside class="card collapse-when-mobile-and-tablet sticky-top mt-4 show-when-desktop justify-content-start align-items-start">
+      <label class="ms-3 mt-2">
+        <input class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
+        Guarda ventanas con solo una pestaña
+      </label>
+      <button class="btn border ms-3 mt-3" type="button" id="loadWindow">Cargar ventana</button>
       <button class="btn border ms-3 mt-2" type="button" id="loadSel">Cargar seleccionados</button>
       <button class="btn border ms-3 mt-2" type="button" id="remWindow">Borrar ventana</button>
       <button class="btn border ms-3 mt-2" type="button" id="remSel">Borrar seleccionados</button>
-      <div class="input-group flex-nowrap px-3 mt-2 mb-3">
+      <div class="input-group flex-nowrap px-3 mt-3 mb-3">
         <span class="input-group-text filter-Icon" id="filterIconWrapper">
           <img id="filterIcon" src="./images/filterIcon.png" alt="">
         </span>

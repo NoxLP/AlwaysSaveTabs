@@ -3,11 +3,8 @@ body {
   background-color: rgb(243, 243, 243);
 }
 aside {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
   width: 250px;
+  height: fit-content;
   margin-left: -5px;
   background-color: transparent !important;
   border: none !important;
@@ -19,7 +16,7 @@ aside > button {
   border: 1px solid lightgray;
 }
 aside > button:hover {
-  background-color: rgba(51, 103, 214, 0.075);;
+  background-color: rgba(51, 103, 214, 0.075) !important;
 }
 .btn:focus {
   box-shadow: none;
@@ -44,18 +41,11 @@ aside > button:hover {
   margin: 0 !important;
   padding: 0 !important;
 }
-.options-icon > div {
-  width: 16px;
-  height: 2px;
-  background-color: white;
-  margin-top: 3.8px;
-  border-radius: 25px;
-}
 .accordion {
   max-width: 80vw;
 }
 .accordion-header {
-  background-color: rgb(51, 103, 214);
+  background-color: rgba(42, 52, 85, 0.897);
   border-top-left-radius: .25rem;
   border-top-right-radius: .25rem;
 }
@@ -64,8 +54,23 @@ aside > button:hover {
   box-shadow: none !important;
   background-color: white !important;
 }
+.accordion-body {
+  background-color: rgb(250, 250, 250);
+}
+.accordion-body > .row {
+  width: 100%;
+  border-radius: 3px;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  border-bottom-right-radius: 0;
+  border-bottom: solid 1px lightgray;
+}
+.accordion-body > .row:hover {
+  background-color: white;
+  /*border: solid 1px lightgray;*/
+}
 .tab-icon {
-  width: 20px;
+  width: 18px;
 }
 .domain-span {
   font-size: 13px;
@@ -103,6 +108,9 @@ aside > button:hover {
   }
   .accordion {
     max-width: 95vw;
+  }
+  #options {
+    margin-left: -20px;
   }
 }
 @media (min-width: 769px) and (max-width: 1400px) {

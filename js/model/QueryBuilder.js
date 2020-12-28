@@ -33,6 +33,9 @@ export const bodyPatchUpdateTabsIds = (bdWindow, tabs) => {
   })
   return body
 }
+export const bodyPatchWindowTitle = title => {
+  return { 'title': title}
+}
 export const getObjectFromTab = tab => {
   return {
     url: tab.url,

@@ -13,7 +13,7 @@ const CHECKED_CHECKBOXES = {
 const WINDOWS_ID_SECTION = 'windowsSection', WINDOWS_ID_EDIT_BUTTON = 'editWindowTitleB', TABS_ID_CHECKBOX = 'tabCBox', CHROMEID_NAME = 'currentChromeId'
 var shift = false, checkedByScript = false, filterCaseSensitive = false;
 
-//#region helpers
+//#region id string building
 const buildWindowEditButtonId = myWindow => `${WINDOWS_ID_EDIT_BUTTON}${myWindow[CHROMEID_NAME]}`
 const buildWindowEditInputGroupId = myWindow => `editWindowTitleIGroup${myWindow[CHROMEID_NAME]}`
 const buildWindowEditInputId = myWindow => `editWindowTitleInput${myWindow[CHROMEID_NAME]}`
@@ -21,8 +21,10 @@ const buildWindowEditOkId = myWindow => `editWindowTitleOk${myWindow[CHROMEID_NA
 const buildWindowCollapseButtonId = myWindow => `windowB${myWindow[CHROMEID_NAME]}`
 const buildTabCheckboxId = tab => `${TABS_ID_CHECKBOX}${tab.tabId}`
 const buildWindowBodyParentId = myWindow => `collapse${myWindow[CHROMEID_NAME]}`
-const getWindowIdFromEditButton = button => button.id.slice(WINDOWS_ID_EDIT_BUTTON.length)
+const getWindowIdFromElementId = element => element.id.match(/(\d*)$/)[0]
+//#endregion
 
+//#region helpers
 const createWindowHTML = myWindow => {
   let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
   let editTitleButtonId = buildWindowEditButtonId(myWindow)
@@ -41,7 +43,7 @@ const createWindowHTML = myWindow => {
   </button>
   <div class="input-group collapse" id="${buildWindowEditInputGroupId(myWindow)}">
     <input id="${buildWindowEditInputId(myWindow)}" type="text" class="form-control" placeholder="New window name" aria-label="New window name" aria-describedby="${editTitleOkId}">
-    <button class="btn btn-outline-secondary" type="button" id="${editTitleOkId}">Ok</button>
+    <button class="btn btn-outline-secondary" type="button" id="${editTitleOkId}" style="color: white;">Ok</button>
   </div>
   <button id="${buildWindowCollapseButtonId(myWindow)}" class="accordion-button collapsed visible" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
   <b>Ventana:</b>${myWindow.title ? '&emsp;' + myWindow.title : '&emsp;windowTitle&nbsp;'} - ${(new Date(myWindow.creationDate)).toLocaleDateString()}
@@ -60,7 +62,7 @@ const buildTabElements = tab => {
   let domain = (tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im) ||[])[0];
   let icon = "http://s2.googleusercontent.com/s2/favicons?domain_url=" + domain;
 
-  return `<div class="row g-2 justify-content-between align-items-center ms-2 mt-3">
+  return `<div class="row g-2 justify-content-between align-items-center ps-2 pb-1 mt-1">
   <div class="col-1 d-flex justify-content-start flex-nowrap align-items-center form-check" style="width: 60px">
     <input class="form-check-input" type="checkbox" value="" id="${buildTabCheckboxId(tab)}">
     <img class="tab-icon ms-3" src="${icon}" alt="web icon">
@@ -71,18 +73,7 @@ const buildTabElements = tab => {
   <span class="domain-span show-when-desktop text-truncate col-3 ms-4">${domain}</span>
 </div>`
 }
-//#endregion
-
-//#region events callbacks
-const onEditWindowNameClick = e => {
-  console.log('edit button click', e.target.parentNode)
-  let windowId = getWindowIdFromEditButton(e.target.parentNode)
-  let myWindow = {[CHROMEID_NAME]: windowId}
-  console.log(myWindow)
-  console.log(buildWindowCollapseButtonId(myWindow))
-  let windowCollButton = document.getElementById(buildWindowCollapseButtonId(myWindow))
-  let windowInputGroup = document.getElementById(buildWindowEditInputGroupId(myWindow))
-
+const exchangeCollapsedWindowNameTitle = (windowCollButton, windowInputGroup) => {
   if(!windowCollButton.classList.contains('collapse')) {
     windowCollButton.classList.add('collapse')
     windowInputGroup.classList.remove('collapse')
@@ -91,8 +82,44 @@ const onEditWindowNameClick = e => {
     windowInputGroup.classList.add('collapse')
   }
 }
-const onEditWindowNameOk = e => {
+//#endregion
 
+//#region events callbacks
+const onEditWindowNameClick = e => {
+  console.log('edit button click', e.target.closest('button'))
+  let windowId = getWindowIdFromElementId(e.target.closest('button'))
+  let myWindow = {[CHROMEID_NAME]: windowId}
+  console.log(document.getElementById(buildWindowCollapseButtonId(myWindow)))
+  console.log(document.getElementById(buildWindowEditInputGroupId(myWindow)))
+  console.log(myWindow)
+  exchangeCollapsedWindowNameTitle(
+    document.getElementById(buildWindowCollapseButtonId(myWindow)), 
+    document.getElementById(buildWindowEditInputGroupId(myWindow)))
+}
+const onEditWindowNameOk = e => {
+  console.log(e.target)
+  let windowId = getWindowIdFromElementId(e.target)
+  let myWindow = {[CHROMEID_NAME]: windowId}
+  console.log(windowId, document.getElementById(buildWindowEditInputId(myWindow)))
+  let input = document.getElementById(buildWindowEditInputId(myWindow))
+  let name = input.value
+  let collapseButton = buildWindowCollapseButtonId(myWindow)
+
+  api.patch(`windowTitle?${CHROMEID_NAME}=${windowId}`, {title: name})
+    .then(res => {
+      console.log(`${windowId} window name succesfully updated to ${name}`)
+
+      let collapseB = document.getElementById(collapseButton)
+      collapseB.innerHTML = `<b>Ventana:</b>${name ? '&emsp;' + name : '&emsp;windowTitle&nbsp;'} - ${collapseB.innerText.match(/(?<=\-\s).*/)[0]}`
+      input.value = ''
+    })
+    .catch(err => {
+      console.error(`Error updating window name: \n${err}`)
+    })
+
+  exchangeCollapsedWindowNameTitle(
+    document.getElementById(collapseButton), 
+    document.getElementById(buildWindowEditInputGroupId(myWindow)))
 }
 const onTabCBChange = e => {
 
