@@ -5,3 +5,6 @@ export const exceptionInitialBD = () => {
 export const exceptionNoWindowSelected = () => {
   
 }
+export const databaseError = (...err) => {
+
+}

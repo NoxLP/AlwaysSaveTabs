@@ -1,7 +1,7 @@
 import * as QueryBuilder from "./model/QueryBuilder.js";
 import * as Helpers from "./helpers.js";
 import * as Exceptions from "./exceptions.js";
-import { buildWindowBodyParentId, buildWindowCollapseButtonId } from "./stringBuilding.js";
+import * as StringBuilder from "./stringBuilding.js";
 
 const api = axios.create({
   baseURL: "http://localhost:3000/",
@@ -75,7 +75,7 @@ const onLoadWindow = () => {
       })
     })
     .catch(err => {
-      console.log("Error trying to get window's tab: ", err)
+      Exceptions.databaseError("Error trying to get window's tab: ", err)
     })
 }
 const onLoadWindowNew = () => {
@@ -99,7 +99,7 @@ const onLoadWindowNew = () => {
       })
     })
     .catch(err => {
-      console.log("Error trying to get window's tab: ", err)
+      Exceptions.databaseError("Error trying to get window's tab: ", err)
     })
 }
 const onLoadSelected = () => {
@@ -109,7 +109,20 @@ const onLoadSelectedNew = () => {
 
 }
 const onRemoveWindow = () => {
+  let id = Helpers.getSelectedWindowId()
+  if (!id) {
+    Exceptions.exceptionNoWindowSelected()
+    return
+  }
 
+  api.delete(`window?${CHROMEID_NAME}=${id}`)
+    .then(res => {
+      let myWindow = {[CHROMEID_NAME]: id}
+      let section = document.getElementById(WINDOWS_ID_SECTION)
+      section.removeChild(document.getElementById(StringBuilder.buildWindowHeaderButtonId(myWindow)))
+      section.removeChild(document.getElementById(StringBuilder.buildWindowBodyParentId(myWindow)))
+    })
+    .catch(err => {Exceptions.databaseError('Error trying to remove window ', err)})
 }
 const onRemoveSelected = () => {
 
@@ -153,6 +166,6 @@ window.onload = () => {
   myWindows.forEach(x => {
     Helpers.createWindowHTML(x)
   })
-  document.getElementById(buildWindowBodyParentId(myWindows[0])).classList.add('show')
-  document.getElementById(buildWindowCollapseButtonId(myWindows[0])).classList.remove('collapsed')
+  document.getElementById(StringBuilder.buildWindowBodyParentId(myWindows[0])).classList.add('show')
+  document.getElementById(StringBuilder.buildWindowCollapseButtonId(myWindows[0])).classList.remove('collapsed')
 })();
