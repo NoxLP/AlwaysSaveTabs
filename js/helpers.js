@@ -1,4 +1,4 @@
-import { WINDOWS_ID_SECTION, CHECKED_CHECKBOXES, onEditWindowNameClick, onEditWindowNameOk, onTabCBChange } from "./management.js";
+import { WINDOWS_ID_SECTION, tabsCheckboxes, onEditWindowNameClick, onEditWindowNameOk, onTabCBChange } from "./management.js";
 import * as StringBuilder from "./stringBuilding.js";
 
 const TAB_CHECKBOX_CLASS = 'tab-checkbox'
@@ -55,7 +55,7 @@ const buildTabElements = tab => {
   </div>`
 }
 const storeCheckbox = cb => {
-  CHECKED_CHECKBOXES.CBs.push(cb.id);
+  tabsCheckboxes.CBs.push(cb.id);
   cb.addEventListener("change", onTabCBChange);
 };
 export const exchangeCollapsedWindowNameTitle = (windowCollButton, windowInputGroup) => {
@@ -72,7 +72,7 @@ export const getSelectedWindowId = () => {
   if (windows.length === 0)
     return null
 
-  return StringBuilder.getWindowIdFromElementId(windows[0])
+  return StringBuilder.getWindowOrTabIdFromElementId(windows[0])
 }
 export const getChromeTabFromBDTab = (bdTab, windowId) => {
   let tab = {

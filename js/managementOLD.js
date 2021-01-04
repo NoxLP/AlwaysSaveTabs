@@ -8,10 +8,10 @@ const TAB_PARENT_DIV_ID_PREFIX = "tabDiv",
   MT_WINDOWSLIST = "windowsList",
   REMOVE_TAB_CB_CLASS = "deleteTabCB",
   LOAD_TAB_CB_CLASS = "loadTabCB";
-const CHECKED_CHECKBOXES = {
+const tabsCheckboxes = {
   CBs: [],
   last: 0,
-  selectedIds: function () { return CHECKED_CHECKBOXES.CBs.filter(x => document.getElementById(x).checked) }
+  selectedIds: function () { return tabsCheckboxes.CBs.filter(x => document.getElementById(x).checked) }
 };
 var shift = false, checkedByScript = false, filterCaseSensitive = false;
 
@@ -20,7 +20,7 @@ const buildTabDivId = id => { return TAB_PARENT_DIV_ID_PREFIX + id; }
 const buildTabHrId = id => { return TAB_PARENT_HR_ID_PREFIX + id; }
 const getHrIdFromDivId = id => { return buildTabHrId(id.match(new RegExp(`(?<=${TAB_PARENT_DIV_ID_PREFIX}).*`))[0]) }
 const storeCheckbox = cb => {
-  CHECKED_CHECKBOXES.CBs.push(cb.getAttribute("id"));
+  tabsCheckboxes.CBs.push(cb.getAttribute("id"));
   cb.addEventListener("change", onTabCBChange);
 };
 const createTabElementIn = (element, tab) => {
@@ -86,7 +86,7 @@ const onLoadAllTabs = () => {
   });
 };
 const onLoadSelectedTabs = () => {
-  const selectedIds = CHECKED_CHECKBOXES.selectedIds();
+  const selectedIds = tabsCheckboxes.selectedIds();
   chrome.storage.local.get(TABS_STORAGE_KEY, tabsStored => {
     for (let windowKey in tabsStored[TABS_STORAGE_KEY]) {
       tabsStored[TABS_STORAGE_KEY][windowKey].tabs
@@ -98,7 +98,7 @@ const onLoadSelectedTabs = () => {
   });
 };
 const onRemoveSelectedTabs = () => {
-  const selectedIds = CHECKED_CHECKBOXES.selectedIds();
+  const selectedIds = tabsCheckboxes.selectedIds();
   var removedIds = [];
   selectedIds.forEach(id => {
     let tabDiv = document.getElementById(`${TAB_PARENT_DIV_ID_PREFIX}${id}`);
@@ -123,23 +123,23 @@ const onTabCBChange = e => {
     return;
 
   if (!shift) {
-    CHECKED_CHECKBOXES.last = CHECKED_CHECKBOXES.CBs.indexOf(e.target.getAttribute("id"));
+    tabsCheckboxes.last = tabsCheckboxes.CBs.indexOf(e.target.getAttribute("id"));
   } else {
     checkedByScript = true;
-    const forward = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id) > CHECKED_CHECKBOXES.last;
-    var i = CHECKED_CHECKBOXES.last + 1 * (forward ? 1 : -1), current;
-    while (i < CHECKED_CHECKBOXES.CBs.length &&
-      (current = CHECKED_CHECKBOXES.CBs[i]) !== e.target.id) {
+    const forward = tabsCheckboxes.CBs.indexOf(e.target.id) > tabsCheckboxes.last;
+    var i = tabsCheckboxes.last + 1 * (forward ? 1 : -1), current;
+    while (i < tabsCheckboxes.CBs.length &&
+      (current = tabsCheckboxes.CBs[i]) !== e.target.id) {
       document.getElementById(current).checked = e.target.checked;
       i = i + 1 * (forward ? 1 : -1);
     }
     if (!forward) {
-      let last = document.getElementById(CHECKED_CHECKBOXES.CBs[CHECKED_CHECKBOXES.last]);
+      let last = document.getElementById(tabsCheckboxes.CBs[tabsCheckboxes.last]);
       last.checked = !last.checked;
     }
 
     checkedByScript = false;
-    CHECKED_CHECKBOXES.last = CHECKED_CHECKBOXES.CBs.indexOf(e.target.getAttribute("id"));
+    tabsCheckboxes.last = tabsCheckboxes.CBs.indexOf(e.target.getAttribute("id"));
   }
 };
 const onScrollStickyTop = () => {

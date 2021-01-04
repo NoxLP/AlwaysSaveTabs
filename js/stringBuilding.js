@@ -8,4 +8,5 @@ export const buildWindowEditOkId = myWindow => `editWindowTitleOk${myWindow[CHRO
 export const buildWindowCollapseButtonId = myWindow => `windowB${myWindow[CHROMEID_NAME]}`
 export const buildTabCheckboxId = tab => `${TABS_ID_CHECKBOX}${tab.tabId}`
 export const buildWindowBodyParentId = myWindow => `collapse${myWindow[CHROMEID_NAME]}`
-export const getWindowIdFromElementId = element => element.id.match(/(\d*)$/)[0]
+export const getWindowOrTabIdFromElementId = element => element.id.match(/(\d*)$/)[0]
+export const getWindowOrTabIdFromId = str => str.match(/(\d*)$/)[0]

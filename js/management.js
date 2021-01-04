@@ -8,10 +8,10 @@ const api = axios.create({
   timeout: 4000
 })
 
-export const CHECKED_CHECKBOXES = {
+export const tabsCheckboxes = {
   CBs: [],
   last: 0,
-  selectedIds: function () { return CHECKED_CHECKBOXES.CBs.filter(x => document.getElementById(x).checked) }
+  selectedIds: function () { return tabsCheckboxes.CBs.filter(x => document.getElementById(x).checked) }
 };
 export const WINDOWS_ID_SECTION = 'windowsSection'
 export const WINDOWS_ID_EDIT_BUTTON = 'editWindowTitleB'
@@ -37,7 +37,7 @@ const onOneTabChange = e => {
 }
 export const onEditWindowNameClick = e => {
   console.log('edit button click', e.target.closest('button'))
-  let windowId = getWindowIdFromElementId(e.target.closest('button'))
+  let windowId = getWindowOrTabIdFromElementId(e.target.closest('button'))
   let myWindow = { [CHROMEID_NAME]: windowId }
   console.log(document.getElementById(buildWindowCollapseButtonId(myWindow)))
   console.log(document.getElementById(buildWindowEditInputGroupId(myWindow)))
@@ -48,7 +48,7 @@ export const onEditWindowNameClick = e => {
 }
 export const onEditWindowNameOk = e => {
   console.log(e.target)
-  let windowId = getWindowIdFromElementId(e.target)
+  let windowId = getWindowOrTabIdFromElementId(e.target)
   let myWindow = { [CHROMEID_NAME]: windowId }
   console.log(windowId, document.getElementById(buildWindowEditInputId(myWindow)))
   let input = document.getElementById(buildWindowEditInputId(myWindow))
@@ -76,22 +76,22 @@ export const onTabCBChange = e => {
     return;
 
   if (!shift) {
-    CHECKED_CHECKBOXES.last = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id);
+    tabsCheckboxes.last = tabsCheckboxes.CBs.indexOf(e.target.id);
   } else {
     checkedByScript = true;
-    let pressedCbIdx = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id)
-    let diff = pressedCbIdx - CHECKED_CHECKBOXES.last
+    let pressedCbIdx = tabsCheckboxes.CBs.indexOf(e.target.id)
+    let diff = pressedCbIdx - tabsCheckboxes.last
     let sign = diff > 0 ? 1 : -1
     
     //iterate forward or backward from last pressed checkbox to e.target pressed checkbox
-    for(let i = CHECKED_CHECKBOXES.last; diff > 0 ? i <= pressedCbIdx : i >= pressedCbIdx; i += sign) {
-      let current = document.getElementById(CHECKED_CHECKBOXES.CBs[i])
+    for(let i = tabsCheckboxes.last; diff > 0 ? i <= pressedCbIdx : i >= pressedCbIdx; i += sign) {
+      let current = document.getElementById(tabsCheckboxes.CBs[i])
       if(current.checked !== e.target.checked)
         current.checked = e.target.checked
     }
 
     checkedByScript = false;
-    CHECKED_CHECKBOXES.last = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id);
+    tabsCheckboxes.last = tabsCheckboxes.CBs.indexOf(e.target.id);
   }
 };
 const onLoadWindow = () => {
@@ -120,13 +120,13 @@ const onLoadWindowNew = () => {
     return
   }
   
-  console.log('on load window', id)
+  //console.log('on load window', id)
   api.get(`window?${CHROMEID_NAME}=${id}`)
     .then(res => {
-      console.log('window get: ', res.data)
+      //console.log('window get: ', res.data)
       
       chrome.windows.create({ focused: true }, w => {
-        console.log('window get: ', res.data)
+        //console.log('window get: ', res.data)
         res.data[0].tabs.forEach(tab => {
           chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab, w.id), 
             x => console.log("Tab loaded: ", x))
@@ -138,10 +138,33 @@ const onLoadWindowNew = () => {
     })
 }
 const onLoadSelected = () => {
+  let tabIds = tabsCheckboxes.selectedIds().map(id => parseInt(StringBuilder.getWindowOrTabIdFromId(id)))
 
+  api.post('tabsByIds', tabIds)
+    .then(res => {
+      res.data.forEach(tab => {
+        chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab), x => console.log("Tab loaded: ", x))
+      })
+    })
+    .catch(err => {
+      Exceptions.databaseError('Error trying to get tabs by ids: ', err)
+    })
 }
 const onLoadSelectedNew = () => {
+  let tabIds = tabsCheckboxes.selectedIds().map(id => parseInt(StringBuilder.getWindowOrTabIdFromId(id)))
 
+  api.post('tabsByIds', tabIds)
+    .then(res => {
+      //console.log(res.data)
+      chrome.windows.create({ focused: true }, w => {
+        res.data.forEach(tab => {
+          chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab, w.id), x => console.log("Tab loaded: ", x))
+        })
+      })
+    })
+    .catch(err => {
+      Exceptions.databaseError('Error trying to get tabs by ids: ', err)
+    })
 }
 const onRemoveWindow = () => {
   let id = Helpers.getSelectedWindowId()
