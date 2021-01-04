@@ -1,5 +1,7 @@
-import { WINDOWS_ID_SECTION, CHROMEID_NAME, onEditWindowNameClick, onEditWindowNameOk } from "./management.js";
+import { WINDOWS_ID_SECTION, CHECKED_CHECKBOXES, onEditWindowNameClick, onEditWindowNameOk, onTabCBChange } from "./management.js";
 import * as StringBuilder from "./stringBuilding.js";
+
+const TAB_CHECKBOX_CLASS = 'tab-checkbox'
 
 export const createWindowHTML = myWindow => {
   let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
@@ -34,22 +36,28 @@ export const createWindowHTML = myWindow => {
   windowsSection.appendChild(windowDiv)
   document.getElementById(editTitleButtonId).addEventListener('click', onEditWindowNameClick)
   document.getElementById(editTitleOkId).addEventListener('click', onEditWindowNameOk)
+  document.querySelectorAll(`.${TAB_CHECKBOX_CLASS}`).forEach(cb => { storeCheckbox(cb) })
+  //storeCheckbox(document.getElementById(StringBuilder.buildTabCheckboxId(tab)))
 }
-export const buildTabElements = tab => {
+const buildTabElements = tab => {
   let domain = (tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im) || [])[0];
   let icon = "http://s2.googleusercontent.com/s2/favicons?domain_url=" + domain;
-
+  
   return `<div class="row g-2 justify-content-between align-items-center ps-2 pb-1 mt-1">
   <div class="col-1 d-flex justify-content-start flex-nowrap align-items-center form-check" style="width: 60px">
-    <input class="form-check-input" type="checkbox" value="" id="${StringBuilder.buildTabCheckboxId(tab)}">
-    <img class="tab-icon ms-3" src="${icon}" alt="web icon">
+  <input class="form-check-input ${TAB_CHECKBOX_CLASS}" type="checkbox" value="" id="${StringBuilder.buildTabCheckboxId(tab)}">
+  <img class="tab-icon ms-3" src="${icon}" alt="web icon">
   </div>
   <a class="text-truncate col-9 col-md-10 col-lg-7 col-xl-8 ms-lg-3 mb-1" target="_blank" href="${tab.url}">
-    <span>${tab.title}</span>
+  <span>${tab.title}</span>
   </a>
   <span class="domain-span show-when-desktop text-truncate col-3 ms-4">${domain}</span>
-</div>`
+  </div>`
 }
+const storeCheckbox = cb => {
+  CHECKED_CHECKBOXES.CBs.push(cb.id);
+  cb.addEventListener("change", onTabCBChange);
+};
 export const exchangeCollapsedWindowNameTitle = (windowCollButton, windowInputGroup) => {
   if (!windowCollButton.classList.contains('collapse')) {
     windowCollButton.classList.add('collapse')

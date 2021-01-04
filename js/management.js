@@ -8,7 +8,7 @@ const api = axios.create({
   timeout: 4000
 })
 
-const CHECKED_CHECKBOXES = {
+export const CHECKED_CHECKBOXES = {
   CBs: [],
   last: 0,
   selectedIds: function () { return CHECKED_CHECKBOXES.CBs.filter(x => document.getElementById(x).checked) }
@@ -17,9 +17,24 @@ export const WINDOWS_ID_SECTION = 'windowsSection'
 export const WINDOWS_ID_EDIT_BUTTON = 'editWindowTitleB'
 export const TABS_ID_CHECKBOX = 'tabCBox'
 export const CHROMEID_NAME = 'currentChromeId'
-var shift = false, checkedByScript = false, filterCaseSensitive = false;
+var shift = false, checkedByScript = false, oneTabCheckedByScript = false, filterCaseSensitive = false;
 
 //#region events callbacks
+const onOneTabChange = e => {
+  /*if(oneTabCheckedByScript) {
+    oneTabCheckedByScript = false
+    return
+  }*/
+  console.log('one tab checkbox changed to ', e.target.checked)
+
+  //oneTabCheckedByScript = true
+  if(e.target.id === 'oneTabCheckAside')
+    document.getElementById('oneTabCheck').checked = e.target.checked
+  else
+    document.getElementById('oneTabCheckAside').checked = e.target.checked
+  
+  chrome.runtime.sendMessage({saveOneTab: e.target.checked}, () => {})
+}
 export const onEditWindowNameClick = e => {
   console.log('edit button click', e.target.closest('button'))
   let windowId = getWindowIdFromElementId(e.target.closest('button'))
@@ -56,9 +71,29 @@ export const onEditWindowNameOk = e => {
     document.getElementById(collapseButton),
     document.getElementById(buildWindowEditInputGroupId(myWindow)))
 }
-const onTabCBChange = e => {
+export const onTabCBChange = e => {
+  if (checkedByScript)
+    return;
 
-}
+  if (!shift) {
+    CHECKED_CHECKBOXES.last = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id);
+  } else {
+    checkedByScript = true;
+    let pressedCbIdx = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id)
+    let diff = pressedCbIdx - CHECKED_CHECKBOXES.last
+    let sign = diff > 0 ? 1 : -1
+    
+    //iterate forward or backward from last pressed checkbox to e.target pressed checkbox
+    for(let i = CHECKED_CHECKBOXES.last; diff > 0 ? i <= pressedCbIdx : i >= pressedCbIdx; i += sign) {
+      let current = document.getElementById(CHECKED_CHECKBOXES.CBs[i])
+      if(current.checked !== e.target.checked)
+        current.checked = e.target.checked
+    }
+
+    checkedByScript = false;
+    CHECKED_CHECKBOXES.last = CHECKED_CHECKBOXES.CBs.indexOf(e.target.id);
+  }
+};
 const onLoadWindow = () => {
   let id = Helpers.getSelectedWindowId()
   if (!id) {
@@ -134,16 +169,26 @@ const onFilterKeyUp = e => {
 
 //#region events
 document.addEventListener("keydown", e => {
-  if (e.key === "Shift") {
+  if (e.key === "Shift" && !shift) {
     shift = true
   }
 })
 document.addEventListener("keyup", e => {
-  if (e.key === "Shift") {
+  if (e.key === "Shift" && shift) {
     shift = false
   }
 })
 window.onload = () => {
+  document.getElementById("oneTabCheckAside").addEventListener("change", onOneTabChange)
+  document.getElementById("loadWindowAside").addEventListener("click", onLoadWindow)
+  document.getElementById("loadWindowNewAside").addEventListener("click", onLoadWindowNew)
+  document.getElementById("loadSelAside").addEventListener("click", onLoadSelected)
+  document.getElementById("loadSelNewAside").addEventListener("click", onLoadSelectedNew)
+  document.getElementById("remWindowAside").addEventListener("click", onRemoveWindow)
+  document.getElementById("remSelAside").addEventListener("click", onRemoveSelected)
+  document.getElementById("filterInputAside").addEventListener("keyup", onFilterKeyUp)
+
+  document.getElementById("oneTabCheck").addEventListener("change", onOneTabChange)
   document.getElementById("loadWindow").addEventListener("click", onLoadWindow)
   document.getElementById("loadWindowNew").addEventListener("click", onLoadWindowNew)
   document.getElementById("loadSel").addEventListener("click", onLoadSelected)

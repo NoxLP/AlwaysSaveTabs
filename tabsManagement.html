@@ -22,29 +22,27 @@
         <ul class="dropdown-menu" aria-labelledby="mobile-options">
           <li>
             <label class="ms-3 me-2 mt-2">
-              <input class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
+              <input id="oneTabCheck" class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
               Guarda ventanas con solo una pestaña
             </label>
           </li>
           <li>
-            <a href="#" class="dropdown-item mt-1">
-              Load window
-            </a>
+            <a id="loadWindow" href="#" class="dropdown-item mt-1">Cargar ventana</a>
           </li>
           <li>
-            <a href="#" class="dropdown-item">
-              Load selected
-            </a>
+            <a id="loadWindowNew" href="#" class="dropdown-item mt-1">Cargar ventana en nueva ventana</a>
           </li>
           <li>
-            <a href="#" class="dropdown-item">
-              Remove window
-            </a>
+            <a href="#" class="dropdown-item" id="loadSel">Cargar pestañas seleccionadas</a>
           </li>
           <li>
-            <a href="#" class="dropdown-item">
-              Remove selected
-            </a>
+            <a href="#" class="dropdown-item" id="loadSelNew" id="loadSelNewAside">Cargar pestañas seleccionadas en nueva ventana</a>
+          </li>
+          <li>
+            <a href="#" class="dropdown-item" id="remWindow">Borrar ventana</a>
+          </li>
+          <li>
+            <a href="#" class="dropdown-item" id="remSel">Borrar pestañas seleccionadas</a>
           </li>
           <li>
             <div class="input-group flex-nowrap px-3 mt-2">
@@ -65,16 +63,16 @@
   <section class="d-flex align-content-stretch">
     <aside class="card collapse-when-mobile-and-tablet sticky-top mt-4 show-when-desktop justify-content-start align-items-start">
       <label class="ms-3 mt-2">
-        <input class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
+        <input id="oneTabCheckAside" class="form-check-input" type="checkbox" value="" aria-label="Guarda ventanas con solo una pestaña">
         Guarda ventanas con solo una pestaña
       </label>
       <hr class="mt-3 mb-0">
-      <button class="btn mt-2" type="button" id="loadWindow">Cargar ventana</button>
-      <button class="btn mt-2" type="button" id="loadWindowNew">Cargar ventana en nueva ventana</button>
-      <button class="btn mt-2" type="button" id="loadSel">Cargar seleccionados</button>
-      <button class="btn mt-2" type="button" id="loadSelNew">Cargar seleccionados en nueva ventana</button>
-      <button class="btn mt-2" type="button" id="remWindow">Borrar ventana</button>
-      <button class="btn mt-2" type="button" id="remSel">Borrar seleccionados</button>
+      <button class="btn mt-2" type="button" id="loadWindowAside">Cargar ventana</button>
+      <button class="btn mt-2" type="button" id="loadWindowNewAside">Cargar ventana en nueva ventana</button>
+      <button class="btn mt-2" type="button" id="loadSelAside">Cargar pestañas seleccionadas</button>
+      <button class="btn mt-2" type="button" id="loadSelNewAside">Cargar pestañas seleccionadas en nueva ventana</button>
+      <button class="btn mt-2" type="button" id="remWindowAside">Borrar ventana</button>
+      <button class="btn mt-2" type="button" id="remSelAside">Borrar pestañas seleccionadas</button>
       <hr class="mt-3 mb-0">
       <div class="input-group flex-nowrap px-3 mt-3 mb-3">
         <span class="input-group-text filterIconWrapper" id="filterIconWrapperAside">
