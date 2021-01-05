@@ -11,7 +11,12 @@ const api = axios.create({
 export const tabsCheckboxes = {
   CBs: [],
   last: 0,
-  selectedIds: function () { return tabsCheckboxes.CBs.filter(x => document.getElementById(x).checked) }
+  selectedIds: function () { 
+    return tabsCheckboxes.CBs.filter(x => {
+      let cb = document.getElementById(x)
+      return cb && cb.checked
+    })
+  }
 };
 export const WINDOWS_ID_SECTION = 'windowsSection'
 export const WINDOWS_ID_EDIT_BUTTON = 'editWindowTitleB'
@@ -28,12 +33,12 @@ const onOneTabChange = e => {
   console.log('one tab checkbox changed to ', e.target.checked)
 
   //oneTabCheckedByScript = true
-  if(e.target.id === 'oneTabCheckAside')
+  if (e.target.id === 'oneTabCheckAside')
     document.getElementById('oneTabCheck').checked = e.target.checked
   else
     document.getElementById('oneTabCheckAside').checked = e.target.checked
-  
-  chrome.runtime.sendMessage({saveOneTab: e.target.checked}, () => {})
+
+  chrome.runtime.sendMessage({ saveOneTab: e.target.checked }, () => { })
 }
 export const onEditWindowNameClick = e => {
   console.log('edit button click', e.target.closest('button'))
@@ -82,11 +87,11 @@ export const onTabCBChange = e => {
     let pressedCbIdx = tabsCheckboxes.CBs.indexOf(e.target.id)
     let diff = pressedCbIdx - tabsCheckboxes.last
     let sign = diff > 0 ? 1 : -1
-    
+
     //iterate forward or backward from last pressed checkbox to e.target pressed checkbox
-    for(let i = tabsCheckboxes.last; diff > 0 ? i <= pressedCbIdx : i >= pressedCbIdx; i += sign) {
+    for (let i = tabsCheckboxes.last; diff > 0 ? i <= pressedCbIdx : i >= pressedCbIdx; i += sign) {
       let current = document.getElementById(tabsCheckboxes.CBs[i])
-      if(current.checked !== e.target.checked)
+      if (current.checked !== e.target.checked)
         current.checked = e.target.checked
     }
 
@@ -100,7 +105,7 @@ const onLoadWindow = () => {
     Exceptions.exceptionNoWindowSelected()
     return
   }
-  
+
   console.log('on load window', id)
   api.get(`window?${CHROMEID_NAME}=${id}`)
     .then(res => {
@@ -119,18 +124,18 @@ const onLoadWindowNew = () => {
     Exceptions.exceptionNoWindowSelected()
     return
   }
-  
+
   //console.log('on load window', id)
   api.get(`window?${CHROMEID_NAME}=${id}`)
     .then(res => {
       //console.log('window get: ', res.data)
-      
+
       chrome.windows.create({ focused: true }, w => {
         //console.log('window get: ', res.data)
         res.data[0].tabs.forEach(tab => {
-          chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab, w.id), 
+          chrome.tabs.create(Helpers.getChromeTabFromBDTab(tab, w.id),
             x => console.log("Tab loaded: ", x))
-          })
+        })
       })
     })
     .catch(err => {
@@ -139,6 +144,10 @@ const onLoadWindowNew = () => {
 }
 const onLoadSelected = () => {
   let tabIds = tabsCheckboxes.selectedIds().map(id => parseInt(StringBuilder.getWindowOrTabIdFromId(id)))
+  if (!tabIds || tabIds.length === 0) {
+    Exceptions.exceptionNoTabsSelected('No tabs selected')
+    return
+  }
 
   api.post('tabsByIds', tabIds)
     .then(res => {
@@ -152,6 +161,10 @@ const onLoadSelected = () => {
 }
 const onLoadSelectedNew = () => {
   let tabIds = tabsCheckboxes.selectedIds().map(id => parseInt(StringBuilder.getWindowOrTabIdFromId(id)))
+  if (!tabIds || tabIds.length === 0) {
+    Exceptions.exceptionNoTabsSelected('No tabs selected')
+    return
+  }
 
   api.post('tabsByIds', tabIds)
     .then(res => {
@@ -175,15 +188,30 @@ const onRemoveWindow = () => {
 
   api.delete(`window?${CHROMEID_NAME}=${id}`)
     .then(res => {
-      let myWindow = {[CHROMEID_NAME]: id}
+      let myWindow = { [CHROMEID_NAME]: id }
       let section = document.getElementById(WINDOWS_ID_SECTION)
       section.removeChild(document.getElementById(StringBuilder.buildWindowHeaderButtonId(myWindow)))
       section.removeChild(document.getElementById(StringBuilder.buildWindowBodyParentId(myWindow)))
     })
-    .catch(err => {Exceptions.databaseError('Error trying to remove window ', err)})
+    .catch(err => { Exceptions.databaseError('Error trying to remove window: ', err) })
 }
 const onRemoveSelected = () => {
+  let tabIds = tabsCheckboxes.selectedIds().map(id => parseInt(StringBuilder.getWindowOrTabIdFromId(id)))
+  console.log('tabIds: ', tabIds)
+  if (!tabIds || tabIds.length === 0) {
+    Exceptions.exceptionNoTabsSelected('No tabs selected')
+    return
+  }
 
+  api.delete('tabsByIds', {data: tabIds})
+    .then(res =>  {
+      let body = document.querySelector('.accordion-body')
+      tabIds.forEach(id => {
+        let elem = document.getElementById(id)
+        body.removeChild(document.getElementById(id))
+      })
+    })
+    .catch(err => { Exceptions.databaseError('Error trying to delete selected tabs: ', err) })
 }
 const onFilterKeyUp = e => {
 
@@ -223,6 +251,8 @@ window.onload = () => {
 //#endregion
 
 (async function buildHTML() {
+  let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
+  windowsSection.innerHTML = ''
   let myWindows;
   try {
     myWindows = (await api.get('windows')).data

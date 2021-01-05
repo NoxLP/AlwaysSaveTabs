@@ -5,7 +5,6 @@ const TAB_CHECKBOX_CLASS = 'tab-checkbox'
 
 export const createWindowHTML = myWindow => {
   let windowsSection = document.getElementById(WINDOWS_ID_SECTION)
-  windowsSection.innerHTML = ''
   let editTitleButtonId = StringBuilder.buildWindowEditButtonId(myWindow)
   let editTitleOkId = StringBuilder.buildWindowEditOkId(myWindow)
   let headerId = StringBuilder.buildWindowHeaderButtonId(myWindow)
@@ -43,15 +42,16 @@ const buildTabElements = tab => {
   let domain = (tab.url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im) || [])[0];
   let icon = "http://s2.googleusercontent.com/s2/favicons?domain_url=" + domain;
   
-  return `<div class="row g-2 justify-content-between align-items-center ps-2 pb-1 mt-1">
-  <div class="col-1 d-flex justify-content-start flex-nowrap align-items-center form-check" style="width: 60px">
-  <input class="form-check-input ${TAB_CHECKBOX_CLASS}" type="checkbox" value="" id="${StringBuilder.buildTabCheckboxId(tab)}">
-  <img class="tab-icon ms-3" src="${icon}" alt="web icon">
-  </div>
-  <a class="text-truncate col-9 col-md-10 col-lg-7 col-xl-8 ms-lg-3 mb-1" target="_blank" href="${tab.url}">
-  <span>${tab.title}</span>
-  </a>
-  <span class="domain-span show-when-desktop text-truncate col-3 ms-4">${domain}</span>
+  return `
+  <div id="${tab.tabId}" class="row g-2 justify-content-between align-items-center ps-2 pb-1 mt-1">
+    <div class="col-1 d-flex justify-content-start flex-nowrap align-items-center form-check" style="width: 60px">
+      <input class="form-check-input ${TAB_CHECKBOX_CLASS}" type="checkbox" value="" id="${StringBuilder.buildTabCheckboxId(tab)}">
+      <img class="tab-icon ms-3" src="${icon}" alt="web icon">
+    </div>
+    <a class="text-truncate col-9 col-md-10 col-lg-7 col-xl-8 ms-lg-3 mb-1" target="_blank" href="${tab.url}">
+    <span>${tab.title}</span>
+    </a>
+    <span class="domain-span show-when-desktop text-truncate col-3 ms-4">${domain}</span>
   </div>`
 }
 const storeCheckbox = cb => {
