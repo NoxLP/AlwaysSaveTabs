@@ -21,6 +21,7 @@ export const tabsCheckboxes = {
 export const WINDOWS_ID_SECTION = 'windowsSection'
 export const WINDOWS_ID_EDIT_BUTTON = 'editWindowTitleB'
 export const TABS_ID_CHECKBOX = 'tabCBox'
+export const TABS_DIV_CLASS = 'tab-div'
 export const CHROMEID_NAME = 'currentChromeId'
 var shift = false, checkedByScript = false, oneTabCheckedByScript = false, filterCaseSensitive = false;
 
@@ -214,7 +215,25 @@ const onRemoveSelected = () => {
     .catch(err => { Exceptions.databaseError('Error trying to delete selected tabs: ', err) })
 }
 const onFilterKeyUp = e => {
+  let input = e.target.value;
+  console.log(input);
 
+  //console.log(Array.from(document.querySelectorAll(`.${TABS_DIV_CLASS}`)))
+  Array.from(document.querySelectorAll(`.${TABS_DIV_CLASS}`)).forEach(tabDiv => {
+    let children = Array.from(tabDiv.children)
+    console.log(children)
+    let link = children.filter(elem => elem.tagName === 'A')[0]
+    console.log(link.innerText)
+    let span = children.filter(elem => elem.tagName === 'SPAN')[0]
+
+    if(!link.href.toLowerCase().includes(input) && 
+       !link.innerText.toLowerCase().includes(input) &&
+       !span.innerText.toLowerCase().includes(input)) {
+      tabDiv.classList.add('collapse')
+    } else {
+      tabDiv.classList.remove('collapse')
+    }
+  })  
 }
 //#endregion
 

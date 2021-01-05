@@ -43,13 +43,13 @@ const buildTabElements = tab => {
   let icon = "http://s2.googleusercontent.com/s2/favicons?domain_url=" + domain;
   
   return `
-  <div id="${tab.tabId}" class="row g-2 justify-content-between align-items-center ps-2 pb-1 mt-1">
+  <div id="${tab.tabId}" class="row tab-div g-2 justify-content-between align-items-center ps-2 pb-1 mt-1">
     <div class="col-1 d-flex justify-content-start flex-nowrap align-items-center form-check" style="width: 60px">
       <input class="form-check-input ${TAB_CHECKBOX_CLASS}" type="checkbox" value="" id="${StringBuilder.buildTabCheckboxId(tab)}">
       <img class="tab-icon ms-3" src="${icon}" alt="web icon">
     </div>
     <a class="text-truncate col-9 col-md-10 col-lg-7 col-xl-8 ms-lg-3 mb-1" target="_blank" href="${tab.url}">
-    <span>${tab.title}</span>
+      ${tab.title}
     </a>
     <span class="domain-span show-when-desktop text-truncate col-3 ms-4">${domain}</span>
   </div>`
